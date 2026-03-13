@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, PlusCircle, ArrowLeftRight,
-  KeyRound, Webhook, LogOut, ChevronRight
+  KeyRound, Webhook, LogOut, ChevronRight, BookOpen
 } from 'lucide-react';
 import { Logo } from './ui';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +11,8 @@ const links = [
   { to: '/merchant/create-payment', icon: PlusCircle, label: 'Create Payment' },
   { to: '/merchant/transactions', icon: ArrowLeftRight, label: 'Transactions' },
   { to: '/merchant/api-settings', icon: KeyRound, label: 'API Settings' },
-  { to: '/merchant/webhook-settings', icon: Webhook, label: 'Webhook Settings' },
+  // { to: '/merchant/webhook-settings', icon: Webhook, label: 'Webhook Settings' },
+  { to: '/merchant/docs', icon: BookOpen, label: 'Documentation' },
 ];
 
 export default function MerchantSidebar() {

@@ -8,6 +8,7 @@ import { AdminLayout, MerchantLayout } from './components/Layouts';
 import AdminDashboard from './pages/AdminDashboard';
 import Merchants from './pages/Merchants';
 import MIDManagement from './pages/MIDManagement';
+import MIDPerformance from './pages/MIDPerformance';
 import Transactions from './pages/Transactions';
 import WebhookLogs from './pages/WebhookLogs';
 
@@ -16,6 +17,7 @@ import CreatePayment from './pages/CreatePayment';
 import MerchantTransactions from './pages/MerchantTransactions';
 import APISettings from './pages/APISettings';
 import WebhookSettings from './pages/WebhookSettings';
+import PaynexaDocs from './pages/PaynexaDocs';
 
 import CheckoutPage from './pages/CheckoutPage';
 
@@ -34,6 +36,7 @@ export default function App() {
             <Route index element={<AdminDashboard />} />
             <Route path="merchants" element={<Merchants />} />
             <Route path="mids" element={<MIDManagement />} />
+            <Route path="mids/performance" element={<MIDPerformance />} />
             <Route path="transactions" element={<Transactions />} />
             <Route path="webhook-logs" element={<WebhookLogs />} />
           </Route>
@@ -44,7 +47,8 @@ export default function App() {
             <Route path="create-payment" element={<CreatePayment />} />
             <Route path="transactions" element={<MerchantTransactions />} />
             <Route path="api-settings" element={<APISettings />} />
-            <Route path="webhook-settings" element={<WebhookSettings />} />
+            {/* <Route path="webhook-settings" element={<WebhookSettings />} /> */}
+            <Route path="docs" element={<PaynexaDocs />} />
           </Route>
 
           {/* Redirects */}

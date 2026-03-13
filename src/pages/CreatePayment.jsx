@@ -99,7 +99,7 @@ export default function CreatePayment() {
             {/* Optional URLs */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="label">Webhook URL (Optional)</label>
+                <label className="label">CallBack URL (Optional)</label>
                 <input
                   type="url"
                   placeholder="https://merchant.com/api/callback"

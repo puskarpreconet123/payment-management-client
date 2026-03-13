@@ -1,30 +1,37 @@
 import { useEffect, useState } from 'react';
-import { Plus, CreditCard, ToggleLeft, ToggleRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, CreditCard, ToggleLeft, ToggleRight, BarChart3 } from 'lucide-react';
 import { getMids, createMid, updateMidStatus } from '../services/api';
 import { StatusBadge, Modal, EmptyState, SectionHeader, PageLoader } from '../components/ui';
 import Header from '../components/Header';
 
-const PROVIDERS = ['razorpay', 'paytm', 'phonepe', 'rupeeflow', 'dummy'];
+const PROVIDERS = ['rupeeflow', 'cgpey'];
 
 export default function MIDManagement() {
+  const navigate = useNavigate();
   const [mids, setMids] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
   const [form, setForm] = useState({
-    mid_code: '', provider: 'dummy', api_key: '', api_secret: '',
+    mid_code: '', provider: 'rupeeflow', api_key: '', api_secret: '',
     webhook_secret: '', upi_id: '', merchant_name: ''
   });
 
   const getPlaceholder = (field) => {
     if (field === 'api_key') {
       if (form.provider === 'rupeeflow') return 'RupeeFlow API Token';
-      if (form.provider === 'razorpay') return 'rzp_test_xxxxx';
+      if (form.provider === 'cgpey') return 'CGPEY API Key (x-api-key)';
       return 'API Key';
     }
+    if (field === 'api_secret') {
+      if (form.provider === 'rupeeflow') return 'If Available';
+      if (form.provider === 'cgpey') return 'CGPEY Secret Key (x-secret-key)';
+      return '••••••••••••';
+    }
     if (field === 'upi_id') {
-      if (form.provider === 'rupeeflow') return 'rahifab2024@nsdlpbma (Payee VPA)';
+      if (form.provider === 'rupeeflow') return 'abc123@nsdlpbma (Payee VPA)';
       return 'merchant@upi';
     }
     return '';
@@ -44,7 +51,7 @@ export default function MIDManagement() {
     try {
       await createMid(form);
       setShowCreate(false);
-      setForm({ mid_code: '', provider: 'dummy', api_key: '', api_secret: '', webhook_secret: '', upi_id: '', merchant_name: '' });
+      setForm({ mid_code: '', provider: 'rupeeflow', api_key: '', api_secret: '', webhook_secret: '', upi_id: '', merchant_name: '' });
       load();
     } catch (e) { setErr(e.response?.data?.message || 'Failed to create MID'); }
     setSaving(false);
@@ -63,9 +70,20 @@ export default function MIDManagement() {
           title="Merchant IDs (MIDs)"
           subtitle={`${mids.length} configured`}
           action={
-            <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center gap-2">
-              <Plus size={15} /> Create MID
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => navigate('performance')}
+                className="btn-secondary flex items-center gap-2"
+              >
+                <BarChart3 size={15} /> View Performance
+              </button>
+              <button
+                onClick={() => setShowCreate(true)}
+                className="btn-primary flex items-center gap-2"
+              >
+                <Plus size={15} /> Create MID
+              </button>
+            </div>
           }
         />
 
@@ -146,7 +164,7 @@ export default function MIDManagement() {
               </div>
               <div>
                 <label className="label">API Secret</label>
-                <input className="input-field font-mono text-xs" type="password" placeholder="••••••••••••" value={form.api_secret}
+                <input className="input-field font-mono text-xs" placeholder={getPlaceholder('api_secret')} value={form.api_secret}
                   onChange={e => setForm(p => ({ ...p, api_secret: e.target.value }))}
                   required={form.provider !== 'rupeeflow'} />
               </div>
