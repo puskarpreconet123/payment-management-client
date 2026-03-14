@@ -313,12 +313,16 @@ const { data } = await res.json();`}</Code>
   "data": {
     "payment_id":  "pay_a1b2c3d4e5",
     "order_id":    "ORD-2024-001",
-    "amount":      499.00,
+    "amount":      499,
     "status":      "SUCCESS",
     "utr":         "303124567890",
     "createdAt":   "2024-03-13T11:00:00.000Z",
     "updatedAt":   "2024-03-13T11:14:22.000Z"
   }
+}`}</Code>
+<Code lang="json — not found (404)">{`{
+  "success": false,
+  "message": "Payment not found"
 }`}</Code>
         </div>
       )}
@@ -360,9 +364,9 @@ const data = await res.json();`}</Code>
       {
         "payment_id": "PAY_MMNQLKE5_D53ECC5F",
         "order_id":   "ord_007",
-        "amount":     10,
+        "amount":     499,
         "currency":   "INR",
-        "status":     "CANCELLED",
+        "status":     "SUCCESS",
        "createdAt":   "2024-03-13T11:00:00.000Z",
        "updatedAt":   "2024-03-13T11:14:22.000Z"
       }
