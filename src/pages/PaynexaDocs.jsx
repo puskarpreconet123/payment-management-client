@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const BASE_URL = window.location.origin;
+
 const TABS = ["Create Order", "Handle Response", "Callback (POST)", "Get Transaction"];
 
 const badge = (method) => {
@@ -104,7 +106,7 @@ function CreateOrder() {
       <div style={{ color: "#CDD9E5", fontSize: 13, fontWeight: 600, marginBottom: 8, letterSpacing: 0.5 }}>
         REQUIRED FIELDS
       </div>
-      <Chip label="amount"          value="Float — min 1, max 100000" />
+      <Chip label="amount"          value="Float — min 10, max 100000" />
       <Chip label="order_id"        value="String — your unique order reference" />
       <Chip label="customer_name"   value="String" />
       <Chip label="customer_email"  value="String — valid email" />
@@ -117,7 +119,7 @@ function CreateOrder() {
         </Note>
       </div>
 
-      <Code lang="javascript">{`const response = await fetch("https://api.paynexa.in/api/payments/create", {
+      <Code lang="javascript">{`const response = await fetch("${BASE_URL}/api/payments/create", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -151,14 +153,14 @@ function HandleResponse() {
   "success": true,
   "message": "Payment created successfully",
   "data": {
-    "payment_id": "pay_a1b2c3d4e5",      // store this — use for status checks
-    "order_id":   "ORD-2024-001",
-    "amount":     499.00,
-    "status":     "PENDING",
-    "payment_url": "upi://pay?pa=merchant@upi&am=499.00&tn=pay_a1b2c3d4e5",
-    "qr_code":    "https://api.paynexa.in/qr/pay_a1b2c3d4e5",
-    "expiry_time": "2024-03-13T11:30:00.000Z",
-    "provider":   "rupeeflow"
+    "payment_id":   "pay_a1b2c3d4e5",     // store this — use for status checks
+    "order_id":     "ORD-2024-001",
+    "status":       "CREATED",
+    "qr_string":    "upi://pay?pa=merchant@upi&...",
+    "upi_link":     "upi://pay?pa=merchant@upi&...",
+    "checkout_url": "${BASE_URL}/checkout/PAY_MMPZS6P0_85FE2807",
+    "expiry_time":  "2026-03-14T07:21:20.180Z",
+    "idempotent":   false
   }
 }`}</Code>
 
@@ -167,6 +169,7 @@ function HandleResponse() {
       </div>
 
       {[
+        ["CREATED",  "#58A6FF", "Payment order created, awaiting customer"],
         ["PENDING",   "#D29922", "Awaiting customer payment"],
         ["SUCCESS",   "#3FB950", "Payment received and confirmed"],
         ["FAILED",    "#F85149", "Payment failed or rejected"],
@@ -219,10 +222,11 @@ function CallbackURL() {
 
         <Code lang="json — callback (SUCCESS)">{`{
   "status": "SUCCESS",
+  "amount": 499,
   "payment_id": "pay_a1b2c3d4e5",
   "order_id": "ORD-2024-001",
-  "amount": 499.00,
   "utr": "303124567890",
+  "currency": "INR",
   "customer_name": "Rahul Sharma",
   "timestamp": "2024-03-13T11:14:22.000Z"
 }`}</Code>
@@ -233,9 +237,13 @@ function CallbackURL() {
 
         <Code lang="json — callback (FAILED)">{`{
   "status": "FAILED",
+  "amount": 499,
   "payment_id": "pay_a1b2c3d4e5",
   "order_id": "ORD-2024-001",
-  "message": "payment failed"
+  "utr": "null",
+  "currency": "INR",
+  "customer_name":"Rahul Sharma",
+  "timestamp": "2024-03-13T11:14:22.000Z"
 }`}</Code>
 
         <Note type="info">
@@ -295,7 +303,7 @@ function GetTransaction() {
             </span>
           </div>
           <Code lang="javascript">{`const res = await fetch(
-  "https://api.paynexa.in/api/payments/pay_a1b2c3d4e5",
+  "${BASE_URL}/api/payments/pay_a1b2c3d4e5",
   { headers: { Authorization: "Bearer YOUR_API_TOKEN" } }
 );
 const { data } = await res.json();`}</Code>
@@ -308,7 +316,6 @@ const { data } = await res.json();`}</Code>
     "amount":      499.00,
     "status":      "SUCCESS",
     "utr":         "303124567890",
-    "provider":    "rupeeflow",
     "createdAt":   "2024-03-13T11:00:00.000Z",
     "updatedAt":   "2024-03-13T11:14:22.000Z"
   }
@@ -316,20 +323,20 @@ const { data } = await res.json();`}</Code>
         </div>
       )}
 
-      {mode === "date" && (
-        <div>
-          <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
-            {badge("POST")}
-            <span style={{ fontFamily: "monospace", fontSize: 14, color: "#58A6FF" }}>
-              /api/add-money/v6/trxn-status-enquiry
-            </span>
-          </div>
-          <p style={{ color: "#8B949E", fontSize: 13, margin: "8px 0 12px" }}>
-            Look up a transaction using your <code style={{ color: "#58A6FF" }}>order_id</code> and the date it was created. Useful for daily reconciliation.
-          </p>
+{mode === "date" && (
+  <div>
+    <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
+      {badge("POST")}
+      <span style={{ fontFamily: "monospace", fontSize: 14, color: "#58A6FF" }}>
+        /api/payments/date-wise-payment
+      </span>
+    </div>
+    <p style={{ color: "#8B949E", fontSize: 13, margin: "8px 0 12px" }}>
+      Look up transactions by <code style={{ color: "#58A6FF" }}>order_id</code> or <code style={{ color: "#58A6FF" }}>txn_date</code>. At least one is required.
+    </p>
 
-          <Code lang="javascript">{`const res = await fetch(
-  "https://api.paynexa.in/api/add-money/v6/trxn-status-enquiry",
+    <Code lang="javascript">{`const res = await fetch(
+  "${BASE_URL}/api/payments/date-wise-payment",
   {
     method: "POST",
     headers: {
@@ -337,30 +344,37 @@ const { data } = await res.json();`}</Code>
       "Authorization": "Bearer YOUR_API_TOKEN"
     },
     body: JSON.stringify({
-      client_id: "ORD-2024-001",    // your order_id
-      txn_date:  "2024-03-13"       // YYYY-MM-DD
+      order_id: "ORD-2024-001",  
+      txn_date: "2024-03-13"     // format — YYYY-MM-DD
     })
   }
 );
 const data = await res.json();`}</Code>
 
-          <Code lang="json — response">{`{
-  "status": "success",
+    <Code lang="json — response">{`{
+  "success": true,
+  "message": "Success",
   "data": {
-    "results": [
+    "total": 1,
+    "payments": [
       {
-        "status":    "SUCCESS",
-        "txnAmount": 499.00
+        "payment_id": "PAY_MMNQLKE5_D53ECC5F",
+        "order_id":   "ord_007",
+        "amount":     10,
+        "currency":   "INR",
+        "status":     "CANCELLED",
+       "createdAt":   "2024-03-13T11:00:00.000Z",
+       "updatedAt":   "2024-03-13T11:14:22.000Z"
       }
     ]
   }
 }`}</Code>
-          <Note type="info">
-            If no matching transaction is found for that date, <code style={{ color: "#58A6FF" }}>message</code> returns <code style={{ color: "#58A6FF" }}>"No transaction record found"</code> — not an error.
-          </Note>
-        </div>
-      )}
 
+    <Note type="info">
+      If no matching transaction is found, <code style={{ color: "#58A6FF" }}>total</code> returns <code style={{ color: "#58A6FF" }}>0</code> and <code style={{ color: "#58A6FF" }}>payments</code> returns an empty array — not an error.
+    </Note>
+  </div>
+)}
       <div style={{ marginTop: 28 }}>
         <div style={{ color: "#CDD9E5", fontSize: 13, fontWeight: 600, marginBottom: 12, letterSpacing: 0.5 }}>
           LIST ALL PAYMENTS
@@ -372,7 +386,7 @@ const data = await res.json();`}</Code>
           </span>
         </div>
         <Code lang="javascript">{`const res = await fetch(
-  "https://api.paynexa.in/api/payments?status=SUCCESS&page=1",
+  "${BASE_URL}/api/payments?status=SUCCESS&page=1",
   { headers: { Authorization: "Bearer YOUR_API_TOKEN" } }
 );
 // Returns paginated list with total count`}</Code>
@@ -390,113 +404,107 @@ export default function PaynexaDocs() {
 
   return (
     <div style={{
-      minHeight: "100vh",
+      minHeight: "100%",
       background: "#010409",
       fontFamily: "'Inter', 'Segoe UI', sans-serif",
-      padding: "32px 16px"
+      padding: "40px 16px"
     }}>
-      {/* Header */}
-      <div style={{ maxWidth: 760, margin: "0 auto 32px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 8,
-            background: "linear-gradient(135deg, #1F6FEB, #6366F1)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 16, fontWeight: 900, color: "#fff"
-          }}>P</div>
-          <span style={{ fontSize: 20, fontWeight: 800, color: "#F0F6FF", letterSpacing: -0.5 }}>
-            Paynexa
-          </span>
-          <span style={{
-            fontSize: 11, fontWeight: 600, color: "#58A6FF",
-            background: "#0D2137", border: "1px solid #1D6FA4",
-            padding: "2px 8px", borderRadius: 20
-          }}>API DOCS</span>
-        </div>
-        <p style={{ color: "#8B949E", fontSize: 14, margin: 0 }}>
-          Base URL: <code style={{ color: "#58A6FF", background: "#0D1117", padding: "2px 8px", borderRadius: 4 }}>
-            https://api.paynexa.in
-          </code>
-          &nbsp;&nbsp;·&nbsp;&nbsp;
-          Auth: <code style={{ color: "#7EE787", background: "#0D1117", padding: "2px 8px", borderRadius: 4 }}>
-            Authorization: Bearer YOUR_API_TOKEN
-          </code>
-        </p>
-      </div>
-
-      {/* Tab Bar */}
-      <div style={{ maxWidth: 760, margin: "0 auto 24px" }}>
-        <div style={{
-          display: "flex", gap: 4,
-          background: "#0D1117", border: "1px solid #21262D",
-          borderRadius: 10, padding: 4, flexWrap: "wrap"
-        }}>
-          {TABS.map((t, i) => (
-            <button key={t} onClick={() => setTab(i)} style={{
-              flex: "1 1 auto",
-              padding: "9px 14px", borderRadius: 7, cursor: "pointer",
-              fontWeight: 600, fontSize: 13, border: "none",
-              background: tab === i
-                ? "linear-gradient(135deg, #1F6FEB22, #6366F122)"
-                : "transparent",
-              color: tab === i ? "#58A6FF" : "#8B949E",
-              transition: "all 0.15s",
-              // outline: tab === i ? "1px solid #1D6FA4" : "none",
-              boxShadow: tab === i ? "0 0 0 1px #1D6FA4" : "none",
-              whiteSpace: "nowrap"
-            }}>{t}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* Content Card */}
-      <div style={{ maxWidth: 760, margin: "0 auto" }}>
-        <div style={{
-          background: "#0D1117", border: "1px solid #21262D",
-          borderRadius: 12, padding: "28px 28px"
-        }}>
-          <div style={{
-            fontSize: 18, fontWeight: 800, color: "#F0F6FF",
-            marginBottom: 20, letterSpacing: -0.3
-          }}>{TABS[tab]}</div>
-          {content[tab]}
-        </div>
-
-        {/* Quick steps footer */}
-        <div style={{
-          marginTop: 20,
-          background: "#0D1117", border: "1px solid #21262D",
-          borderRadius: 12, padding: "20px 28px"
-        }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#8B949E", letterSpacing: 1, marginBottom: 16 }}>
-            INTEGRATION STEPS
+      <div style={{ maxWidth: 840, margin: "0 auto" }}>
+          {/* Header */}
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 8,
+                background: "linear-gradient(135deg, #1F6FEB, #6366F1)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 16, fontWeight: 900, color: "#fff"
+              }}>P</div>
+              <span style={{ fontSize: 20, fontWeight: 800, color: "#F0F6FF", letterSpacing: -0.5 }}>
+                Paynexa
+              </span>
+              <span style={{
+                fontSize: 11, fontWeight: 600, color: "#58A6FF",
+                background: "#0D2137", border: "1px solid #1D6FA4",
+                padding: "2px 8px", borderRadius: 20
+              }}>API DOCS</span>
+            </div>
+            <p style={{ color: "#8B949E", fontSize: 14, margin: 0, lineHeight: 1.6 }}>
+              Base URL: <code style={{ color: "#58A6FF", background: "#0D1117", padding: "2px 8px", borderRadius: 4 }}>
+                {BASE_URL}
+              </code>
+              <span style={{ margin: "0 10px", opacity: 0.3 }}>|</span>
+              Auth: <code style={{ color: "#7EE787", background: "#0D1117", padding: "2px 8px", borderRadius: 4 }}>
+                Bearer Token
+              </code>
+            </p>
           </div>
-          <div style={{ display: "flex", gap: 0, flexWrap: "wrap" }}>
-            {[
-              ["1", "Get API Token", "from merchant dashboard"],
-              ["2", "Create Order",  "POST /api/payments/create"],
-              ["3", "Show QR/Link",  "render payment_url to customer"],
-              ["4", "Get Callback",  "POST to your callback URL"],
-              ["5", "Fulfil Order",  "on payment.success event"],
-            ].map(([n, t, s], i, arr) => (
-              <div key={n} style={{ display: "flex", alignItems: "center" }}>
-                <div style={{ textAlign: "center", padding: "0 10px" }}>
+
+          {/* Tab Bar */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{
+              display: "flex", gap: 4,
+              background: "#0D1117", border: "1px solid #21262D",
+              borderRadius: 10, padding: 4, flexWrap: "wrap",
+              overflowX: "auto"
+            }}>
+              {TABS.map((t, i) => (
+                <button key={t} onClick={() => setTab(i)} style={{
+                  flex: "1 1 auto",
+                  padding: "9px 14px", borderRadius: 7, cursor: "pointer",
+                  fontWeight: 600, fontSize: 13, border: "none",
+                  background: tab === i
+                    ? "linear-gradient(135deg, #1F6FEB22, #6366F122)"
+                    : "transparent",
+                  color: tab === i ? "#58A6FF" : "#8B949E",
+                  transition: "all 0.15s",
+                  boxShadow: tab === i ? "0 0 0 1px #1D6FA4" : "none",
+                  whiteSpace: "nowrap"
+                }}>{t}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Content Card */}
+          <div style={{
+            background: "#0D1117", border: "1px solid #21262D",
+            borderRadius: 12, padding: "28px", marginBottom: 20
+          }}>
+            <div style={{
+              fontSize: 18, fontWeight: 800, color: "#F0F6FF",
+              marginBottom: 20, letterSpacing: -0.3
+            }}>{TABS[tab]}</div>
+            {content[tab]}
+          </div>
+
+          {/* Quick steps footer */}
+          <div style={{
+            background: "#0D1117", border: "1px solid #21262D",
+            borderRadius: 12, padding: "20px 28px"
+          }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#565f69", letterSpacing: 1.5, marginBottom: 20, textAlign: "center", textTransform: "uppercase" }}>
+              INTEGRATION WORKFLOW
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+              {[
+                ["1", "API Token", "Merchant settings"],
+                ["2", "Create",  "POST /create"],
+                ["3", "Pay",  "Customer QR"],
+                ["4", "Callback",  "POST handler"],
+                ["5", "Fulfil",  "Order success"],
+              ].map(([n, t, s]) => (
+                <div key={n} style={{ flex: "1 1 auto", minWidth: 120, textAlign: "center", marginBottom: 15 }}>
                   <div style={{
-                    width: 28, height: 28, borderRadius: "50%",
+                    width: 32, height: 32, borderRadius: "50%",
                     background: "linear-gradient(135deg, #1F6FEB, #6366F1)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 12, fontWeight: 800, color: "#fff", margin: "0 auto 6px"
+                    fontSize: 13, fontWeight: 800, color: "#fff", margin: "0 auto 8px"
                   }}>{n}</div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#CDD9E5", whiteSpace: "nowrap" }}>{t}</div>
-                  <div style={{ fontSize: 10, color: "#8B949E", whiteSpace: "nowrap" }}>{s}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#CDD9E5", marginBottom: 2 }}>{t}</div>
+                  <div style={{ fontSize: 11, color: "#8B949E" }}>{s}</div>
                 </div>
-                {i < arr.length - 1 && (
-                  <div style={{ fontSize: 16, color: "#21262D", margin: "0 2px", paddingBottom: 18 }}>→</div>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
       </div>
     </div>
   );
