@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // ── Logo ──────────────────────────────────────
@@ -5,34 +6,34 @@ export function Logo({ size = 'md' }) {
   const sz = size === 'sm' ? 'text-lg' : 'text-2xl';
   return (
     <div className={`font-bold ${sz} tracking-tight flex items-center gap-2`}>
-      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-900/40">
+      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-sm shadow-emerald-500/20">
         <span className="text-white text-xs font-black">₹</span>
       </div>
-      <span className="text-white">Pay<span className="text-emerald-400">Nexa</span></span>
+      <span className="text-white">Pay<span className="text-emerald-600">Nexa</span></span>
     </div>
   );
 }
 
 // ── Status Badge ───────────────────────────────
 const STATUS_MAP = {
-  SUCCESS:   { bg: 'bg-emerald-900/40',  text: 'text-emerald-400',  border: 'border border-emerald-800/50',  dot: 'bg-emerald-400' },
-  CREATED:   { bg: 'bg-blue-900/40',     text: 'text-blue-300',     border: 'border border-blue-800/50',     dot: 'bg-blue-400' },
-  PENDING:   { bg: 'bg-amber-900/40',    text: 'text-amber-400',    border: 'border border-amber-800/50',    dot: 'bg-amber-400' },
-  FAILED:    { bg: 'bg-red-900/40',      text: 'text-red-400',      border: 'border border-red-800/50',      dot: 'bg-red-400' },
-  EXPIRED:   { bg: 'bg-slate-700/40',    text: 'text-slate-400',    border: 'border border-slate-600/50',    dot: 'bg-slate-400' },
-  active:    { bg: 'bg-emerald-900/40',  text: 'text-emerald-400',  border: 'border border-emerald-800/50',  dot: 'bg-emerald-400' },
-  inactive:  { bg: 'bg-slate-700/40',    text: 'text-slate-400',    border: 'border border-slate-600/50',    dot: 'bg-slate-400' },
-  suspended: { bg: 'bg-red-900/40',      text: 'text-red-400',      border: 'border border-red-800/50',      dot: 'bg-red-400' },
-  success:   { bg: 'bg-emerald-900/40',  text: 'text-emerald-400',  border: 'border border-emerald-800/50',  dot: 'bg-emerald-400' },
-  failed:    { bg: 'bg-red-900/40',      text: 'text-red-400',      border: 'border border-red-800/50',      dot: 'bg-red-400' },
-  pending:   { bg: 'bg-amber-900/40',    text: 'text-amber-400',    border: 'border border-amber-800/50',    dot: 'bg-amber-400' },
-  exhausted: { bg: 'bg-red-900/40',      text: 'text-red-400',      border: 'border border-red-800/50',      dot: 'bg-red-400' },
+  SUCCESS:   { bg: 'bg-emerald-50',  text: 'text-emerald-700',  border: 'border border-emerald-200',  dot: 'bg-emerald-500' },
+  CREATED:   { bg: 'bg-blue-50',     text: 'text-blue-700',     border: 'border border-blue-200',     dot: 'bg-blue-500' },
+  PENDING:   { bg: 'bg-amber-50',    text: 'text-amber-700',    border: 'border border-amber-200',    dot: 'bg-amber-500' },
+  FAILED:    { bg: 'bg-red-50',      text: 'text-red-700',      border: 'border border-red-200',      dot: 'bg-red-500' },
+  EXPIRED:   { bg: 'bg-gray-100',    text: 'text-gray-700',     border: 'border border-gray-200',     dot: 'bg-gray-500' },
+  active:    { bg: 'bg-emerald-50',  text: 'text-emerald-700',  border: 'border border-emerald-200',  dot: 'bg-emerald-500' },
+  inactive:  { bg: 'bg-gray-100',    text: 'text-gray-700',     border: 'border border-gray-200',     dot: 'bg-gray-500' },
+  suspended: { bg: 'bg-red-50',      text: 'text-red-700',      border: 'border border-red-200',      dot: 'bg-red-500' },
+  success:   { bg: 'bg-emerald-50',  text: 'text-emerald-700',  border: 'border border-emerald-200',  dot: 'bg-emerald-500' },
+  failed:    { bg: 'bg-red-50',      text: 'text-red-700',      border: 'border border-red-200',      dot: 'bg-red-500' },
+  pending:   { bg: 'bg-amber-50',    text: 'text-amber-700',    border: 'border border-amber-200',    dot: 'bg-amber-500' },
+  exhausted: { bg: 'bg-red-50',      text: 'text-red-700',      border: 'border border-red-200',      dot: 'bg-red-500' },
 };
 
 export function StatusBadge({ status }) {
   const s = STATUS_MAP[status] || STATUS_MAP.PENDING;
   return (
-    <span className={`status-badge ${s.bg} ${s.text} ${s.border}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${s.bg} ${s.text} ${s.border}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
       {status}
     </span>
@@ -42,38 +43,36 @@ export function StatusBadge({ status }) {
 // ── Stats Card ─────────────────────────────────
 export function StatsCard({ title, value, icon: Icon, trend, color = 'emerald', subtitle }) {
   const colors = {
-    emerald: { icon: 'text-emerald-400', bg: 'bg-emerald-900/20', border: 'border-emerald-800/30' },
-    blue:    { icon: 'text-blue-400',    bg: 'bg-blue-900/20',    border: 'border-blue-800/30' },
-    amber:   { icon: 'text-amber-400',   bg: 'bg-amber-900/20',   border: 'border-amber-800/30' },
-    red:     { icon: 'text-red-400',     bg: 'bg-red-900/20',     border: 'border-red-800/30' },
-    violet:  { icon: 'text-violet-400',  bg: 'bg-violet-900/20',  border: 'border-violet-800/30' },
+    emerald: { icon: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+    blue:    { icon: 'text-blue-600',    bg: 'bg-blue-50',    border: 'border-blue-100' },
+    amber:   { icon: 'text-amber-600',   bg: 'bg-amber-50',   border: 'border-amber-100' },
+    red:     { icon: 'text-red-600',     bg: 'bg-red-50',     border: 'border-red-100' },
+    violet:  { icon: 'text-violet-600',  bg: 'bg-violet-50',  border: 'border-violet-100' },
   };
-  const c = colors[color];
+  const c = colors[color] || colors.emerald;
+  
   return (
-    <div className={`stat-card relative overflow-hidden`}>
-      <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
-      <div className="relative">
-        <div className="flex items-start justify-between mb-4">
-          <div className={`p-2.5 rounded-10 ${c.bg} border ${c.border}`}>
-            <Icon size={18} className={c.icon} />
-          </div>
-          {trend !== undefined && (
-            <span className={`text-xs font-mono font-medium ${trend >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}%
-            </span>
-          )}
+    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div className="flex items-start justify-between mb-4">
+        <div className={`p-2 rounded-lg ${c.bg} border ${c.border}`}>
+          <Icon size={20} className={c.icon} />
         </div>
-        <div className="font-mono text-3xl font-semibold text-white mb-1 tracking-tight">{value}</div>
-        <div className="text-xs font-medium text-slate-400 uppercase tracking-wider">{title}</div>
-        {subtitle && <div className="text-xs text-slate-500 mt-1">{subtitle}</div>}
+        {trend !== undefined && (
+          <span className={`text-xs font-mono font-bold ${trend >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+            {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}%
+          </span>
+        )}
       </div>
+      <div className="font-mono text-3xl font-bold text-gray-900 mb-1 tracking-tight">{value}</div>
+      <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">{title}</div>
+      {subtitle && <div className="text-xs text-gray-400 mt-1">{subtitle}</div>}
     </div>
   );
 }
 
 // ── Spinner ────────────────────────────────────
 export function Spinner({ size = 18, className = '' }) {
-  return <Loader2 size={size} className={`animate-spin text-emerald-400 ${className}`} />;
+  return <Loader2 size={size} className={`animate-spin text-emerald-500 ${className}`} />;
 }
 
 export function PageLoader() {
@@ -81,7 +80,7 @@ export function PageLoader() {
     <div className="flex items-center justify-center h-64">
       <div className="flex flex-col items-center gap-3">
         <Spinner size={32} />
-        <span className="text-slate-500 text-sm">Loading…</span>
+        <span className="text-gray-400 text-sm font-medium tracking-wide">Processing...</span>
       </div>
     </div>
   );
@@ -91,12 +90,12 @@ export function PageLoader() {
 export function Modal({ open, onClose, title, children, maxWidth = 'max-w-lg' }) {
   if (!open) return null;
   return (
-    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={`modal-box ${maxWidth}`}>
+    <div className="fixed inset-0 z-50 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className={`${maxWidth} w-full bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 animate-in fade-in zoom-in duration-200`}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
-            <X size={16} />
+          <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+            <X size={18} />
           </button>
         </div>
         {children}
@@ -106,44 +105,106 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-lg' })
 }
 
 // ── Pagination ─────────────────────────────────
-export function Pagination({ page, total, limit, onChange }) {
-  const totalPages = Math.ceil(total / limit);
-  if (totalPages <= 1) return null;
+export function Pagination({ page, total, limit, onChange, onLimitChange }) {
+  const totalPages = Math.ceil(total / (limit || 10));
+  const [jumpPage, setJumpPage] = useState(page);
+  const [tempLimit, setTempLimit] = useState(limit);
+  const timerRef = useRef(null);
+
+  useEffect(() => { setJumpPage(page); }, [page]);
+  useEffect(() => { setTempLimit(limit); }, [limit]);
+
+  if (total <= 0) return null;
+
+  const commitJump = () => {
+    const p = Math.max(1, Math.min(parseInt(jumpPage), totalPages));
+    if (!isNaN(p) && p !== page) onChange(p);
+  };
+
+  const commitLimit = () => {
+    const l = Math.max(1, parseInt(tempLimit));
+    if (!isNaN(l) && l !== limit) onLimitChange(l);
+  };
+
+  const handleLimitChange = (val) => {
+    setTempLimit(val);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(commitLimit, 1500);
+  };
+
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-white/5">
-      <span className="text-xs text-slate-500 font-mono">
-        {(page - 1) * limit + 1}–{Math.min(page * limit, total)} of {total}
-      </span>
-      <div className="flex gap-1">
-        <button
-          onClick={() => onChange(page - 1)}
-          disabled={page <= 1}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        >
-          <ChevronLeft size={15} />
-        </button>
-        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-          const p = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
-          return (
-            <button
-              key={p}
-              onClick={() => onChange(p)}
-              className={`w-7 h-7 rounded-lg text-xs font-mono transition-colors ${
-                p === page ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              {p}
-            </button>
-          );
-        })}
-        <button
-          onClick={() => onChange(page + 1)}
-          disabled={page >= totalPages}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        >
-          <ChevronRight size={15} />
-        </button>
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-100 bg-white">
+      <div className="flex items-center gap-6">
+        <span className="text-[11px] text-gray-400 font-mono uppercase tracking-widest font-bold">
+          Showing {Math.min((page - 1) * limit + 1, total)}–{Math.min(page * limit, total)} of {total}
+        </span>
+        
+        <div className="flex items-center gap-2 border-l border-gray-100 pl-6">
+          <label className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">Limit</label>
+          <input
+            type="number"
+            value={tempLimit}
+            onChange={(e) => handleLimitChange(e.target.value)}
+            onBlur={commitLimit}
+            onKeyDown={(e) => e.key === 'Enter' && commitLimit()}
+            className="w-12 h-8 bg-gray-50 border border-gray-200 rounded-lg text-xs font-mono text-center text-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+          />
+        </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 pr-4 border-r border-gray-100">
+            <label className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">Jump</label>
+            <input
+              type="number"
+              value={jumpPage}
+              onChange={(e) => setJumpPage(e.target.value)}
+              onBlur={commitJump}
+              onKeyDown={(e) => e.key === 'Enter' && commitJump()}
+              className="w-10 h-8 bg-gray-50 border border-gray-200 rounded-lg text-xs font-mono text-center text-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+            />
+          </div>
+
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => onChange(page - 1)}
+              disabled={page <= 1}
+              className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-20 transition-all"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const p = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
+                if (p <= 0 || p > totalPages) return null;
+                return (
+                  <button
+                    key={p}
+                    onClick={() => onChange(p)}
+                    className={`w-8 h-8 rounded-lg text-xs font-mono font-bold transition-all border ${
+                      p === page 
+                        ? 'bg-emerald-500 border-emerald-500 text-slate-100 shadow-sm shadow-emerald-500/20' 
+                        : 'bg-white border-gray-200 text-gray-500 hover:border-emerald-300 hover:text-emerald-600'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => onChange(page + 1)}
+              disabled={page >= totalPages}
+              className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-20 transition-all"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -151,10 +212,12 @@ export function Pagination({ page, total, limit, onChange }) {
 // ── Empty State ────────────────────────────────
 export function EmptyState({ icon: Icon, title, desc }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      {Icon && <Icon size={36} className="text-slate-600 mb-3" />}
-      <div className="text-slate-400 font-medium mb-1">{title}</div>
-      {desc && <div className="text-slate-600 text-sm">{desc}</div>}
+    <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+      <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4 border border-gray-100">
+        {Icon && <Icon size={28} className="text-gray-300" />}
+      </div>
+      <div className="text-gray-900 font-bold tracking-tight mb-1">{title}</div>
+      {desc && <div className="text-gray-500 text-sm max-w-xs">{desc}</div>}
     </div>
   );
 }
@@ -162,10 +225,10 @@ export function EmptyState({ icon: Icon, title, desc }) {
 // ── Section Header ─────────────────────────────
 export function SectionHeader({ title, subtitle, action }) {
   return (
-    <div className="flex items-start justify-between mb-6">
+    <div className="flex items-center justify-between mb-8">
       <div>
-        <h1 className="text-xl font-semibold text-white">{title}</h1>
-        {subtitle && <p className="text-slate-500 text-sm mt-1">{subtitle}</p>}
+        <h1 className="text-xl font-bold text-gray-900 tracking-tight">{title}</h1>
+        {subtitle && <p className="text-gray-400 text-sm mt-0.5 font-medium">{subtitle}</p>}
       </div>
       {action}
     </div>
@@ -182,11 +245,8 @@ export function CopyButton({ text, label = '' }) {
     });
   };
   return (
-    <button onClick={copy} className="text-xs px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-emerald-400 transition-colors font-mono">
-      {copied ? '✓ copied' : (label || 'copy')}
+    <button onClick={copy} className="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 text-gray-500 hover:text-emerald-700 transition-all font-mono text-[10px] font-bold shadow-sm uppercase">
+      {copied ? '✓ Copied' : (label || 'Copy')}
     </button>
   );
 }
-
-// need useState for CopyButton
-import { useState } from 'react';

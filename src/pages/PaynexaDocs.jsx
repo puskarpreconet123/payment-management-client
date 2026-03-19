@@ -1,87 +1,69 @@
 import { useState } from "react";
-
-const BASE_URL = window.location.origin;
-
+import { useOutletContext } from "react-router-dom";
+import { Menu } from "lucide-react";
+  
+const BASE_URL = import.meta.env.VITE_API_URL
 const TABS = ["Create Order", "Handle Response", "Callback (POST)", "Get Transaction"];
 
 const badge = (method) => {
-  const styles = {
-    POST: { bg: "#3B82F6", color: "#fff" },
-    GET:  { bg: "#10B981", color: "#fff" },
-  };
-  const s = styles[method] || { bg: "#6B7280", color: "#fff" };
+  const isPost = method === 'POST';
+  const isGet = method === 'GET';
+  
   return (
-    <span style={{
-      background: s.bg, color: s.color,
-      fontSize: 10, fontWeight: 700, fontFamily: "monospace",
-      padding: "2px 8px", borderRadius: 4, letterSpacing: 1,
-      marginRight: 10
-    }}>{method}</span>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wider mr-2.5 border ${
+      isPost ? 'bg-blue-50 text-blue-700 border-blue-200' :
+      isGet ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+      'bg-gray-100 text-gray-700 border-gray-200'
+    }`}>
+      {method}
+    </span>
   );
 };
 
 const Code = ({ children, lang = "" }) => (
-  <div style={{
-    background: "#0D1117", border: "1px solid #21262D",
-    borderRadius: 10, overflow: "hidden", marginTop: 12
-  }}>
+  <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden mt-3 shadow-sm">
     {lang && (
-      <div style={{
-        background: "#161B22", borderBottom: "1px solid #21262D",
-        padding: "6px 16px", fontSize: 11, color: "#8B949E",
-        fontFamily: "monospace", letterSpacing: 0.5
-      }}>{lang}</div>
+      <div className="bg-gray-800/80 border-b border-gray-700/50 px-4 py-2 text-[11px] text-gray-400 font-mono tracking-wide">
+        {lang}
+      </div>
     )}
-    <pre style={{
-      margin: 0, padding: "18px 20px",
-      fontSize: 13, lineHeight: 1.7, color: "#E6EDF3",
-      fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-      overflowX: "auto", whiteSpace: "pre"
-    }}>{children}</pre>
+    <pre className="m-0 p-5 text-[13px] leading-relaxed text-gray-100 font-mono overflow-x-auto whitespace-pre">
+      {children}
+    </pre>
   </div>
 );
 
 const Step = ({ n, title, children }) => (
-  <div style={{ display: "flex", gap: 16, marginBottom: 28 }}>
-    <div style={{
-      minWidth: 32, height: 32, borderRadius: "50%",
-      background: "linear-gradient(135deg, #3B82F6, #6366F1)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: 13, fontWeight: 800, color: "#fff", flexShrink: 0, marginTop: 2
-    }}>{n}</div>
-    <div style={{ flex: 1 }}>
-      <div style={{ fontWeight: 700, color: "#F0F6FF", fontSize: 15, marginBottom: 6 }}>{title}</div>
-      <div style={{ color: "#8B949E", fontSize: 14, lineHeight: 1.7 }}>{children}</div>
+  <div className="flex gap-4 mb-7">
+    <div className="min-w-[32px] w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[13px] font-bold text-emerald-700 shrink-0 mt-0.5 shadow-sm">
+      {n}
+    </div>
+    <div className="flex-1">
+      <div className="font-bold text-gray-900 text-[15px] mb-1.5">{title}</div>
+      <div className="text-gray-600 text-[14px] leading-relaxed">{children}</div>
     </div>
   </div>
 );
 
 const Chip = ({ label, value }) => (
-  <div style={{
-    display: "flex", alignItems: "center", gap: 8,
-    background: "#161B22", border: "1px solid #21262D",
-    borderRadius: 8, padding: "8px 14px", marginBottom: 8
-  }}>
-    <span style={{ color: "#7EE787", fontFamily: "monospace", fontSize: 13, minWidth: 140 }}>{label}</span>
-    <span style={{ color: "#8B949E", fontSize: 13 }}>{value}</span>
+  <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg py-2.5 px-3.5 mb-2 shadow-sm">
+    <span className="text-emerald-700 font-mono font-bold text-[13px] min-w-[140px]">{label}</span>
+    <span className="text-gray-600 text-[13px]">{value}</span>
   </div>
 );
 
 const Note = ({ type = "info", children }) => {
   const styles = {
-    info:    { bg: "#0D2137", border: "#1D6FA4", icon: "ℹ", color: "#58A6FF" },
-    warning: { bg: "#1C1500", border: "#9E6A03", icon: "⚠", color: "#D29922" },
-    success: { bg: "#0A1F0A", border: "#2EA043", icon: "✓", color: "#3FB950" },
+    info:    { bg: "bg-blue-50",    border: "border-blue-200",    text: "text-blue-800",    icon: "text-blue-600",    iconChar: "ℹ" },
+    warning: { bg: "bg-amber-50",   border: "border-amber-200",   text: "text-amber-800",   icon: "text-amber-600",   iconChar: "⚠" },
+    success: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-800", icon: "text-emerald-600", iconChar: "✓" },
   };
-  const s = styles[type];
+  const s = styles[type] || styles.info;
+  
   return (
-    <div style={{
-      background: s.bg, border: `1px solid ${s.border}`,
-      borderRadius: 8, padding: "12px 16px", marginTop: 14,
-      display: "flex", gap: 10, alignItems: "flex-start"
-    }}>
-      <span style={{ color: s.color, fontWeight: 700, fontSize: 14, marginTop: 1 }}>{s.icon}</span>
-      <span style={{ color: "#CDD9E5", fontSize: 13, lineHeight: 1.6 }}>{children}</span>
+    <div className={`${s.bg} border ${s.border} rounded-xl p-3.5 mt-3.5 flex gap-3 items-start shadow-sm`}>
+      <span className={`${s.icon} font-bold text-[14px] mt-0.5`}>{s.iconChar}</span>
+      <span className={`${s.text} text-[13px] leading-relaxed font-medium`}>{children}</span>
     </div>
   );
 };
@@ -91,20 +73,20 @@ const Note = ({ type = "info", children }) => {
 function CreateOrder() {
   return (
     <div>
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
+      <div className="mb-6">
+        <div className="flex items-center mb-1.5">
           {badge("POST")}
-          <span style={{ fontFamily: "monospace", fontSize: 14, color: "#58A6FF" }}>
+          <span className="font-mono text-[14px] font-semibold text-gray-900">
             /api/payments/create
           </span>
         </div>
-        <p style={{ color: "#8B949E", fontSize: 14, margin: 0 }}>
+        <p className="text-gray-500 text-[14px] m-0 leading-relaxed">
           Authenticated with your API token. Paynexa creates the payment order, forwards to RupeeFlow, and returns a UPI payment link.
         </p>
       </div>
 
-      <div style={{ color: "#CDD9E5", fontSize: 13, fontWeight: 600, marginBottom: 8, letterSpacing: 0.5 }}>
-        REQUIRED FIELDS
+      <div className="text-gray-400 text-[11px] font-bold mb-2 tracking-widest uppercase">
+        Required Fields
       </div>
       <Chip label="amount"          value="Float — min 10, max 100000" />
       <Chip label="order_id"        value="String — your unique order reference" />
@@ -112,10 +94,10 @@ function CreateOrder() {
       <Chip label="customer_email"  value="String — valid email" />
       <Chip label="customer_mobile" value="String — 10-digit Indian number" />
 
-      <div style={{ marginTop: 12 }}>
+      <div className="mt-4">
         <Note type="info">
-          Optional: <code style={{ color: "#58A6FF" }}>callback_url</code> (Server-to-server POST notification),{" "}
-          <code style={{ color: "#58A6FF" }}>redirect_url</code> (Customer redirect after payment).
+          Optional: <code className="text-blue-700 bg-blue-100/50 px-1.5 py-0.5 rounded font-mono text-[12px]">callback_url</code> (Server-to-server POST notification),{" "}
+          <code className="text-blue-700 bg-blue-100/50 px-1.5 py-0.5 rounded font-mono text-[12px]">redirect_url</code> (Customer redirect after payment).
         </Note>
       </div>
 
@@ -144,9 +126,9 @@ const data = await response.json();`}</Code>
 function HandleResponse() {
   return (
     <div>
-      <p style={{ color: "#8B949E", fontSize: 14, marginTop: 0, marginBottom: 20 }}>
-        On success, you receive <strong style={{ color: "#E6EDF3" }}>HTTP 201</strong> with the payment details.
-        Show the <code style={{ color: "#58A6FF" }}>payment_url</code> or <code style={{ color: "#58A6FF" }}>qr_code</code> to your customer.
+      <p className="text-gray-600 text-[14px] mt-0 mb-5 leading-relaxed">
+        On success, you receive <strong className="text-gray-900">HTTP 201</strong> with the payment details.
+        Show the <code className="text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded font-mono text-[12px]">payment_url</code> or <code className="text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded font-mono text-[12px]">qr_code</code> to your customer.
       </p>
 
       <Code lang="json — success response (201)">{`{
@@ -164,34 +146,28 @@ function HandleResponse() {
   }
 }`}</Code>
 
-      <div style={{ marginTop: 24, color: "#CDD9E5", fontSize: 13, fontWeight: 600, marginBottom: 12, letterSpacing: 0.5 }}>
-        PAYMENT STATUS VALUES
+      <div className="mt-8 text-gray-400 text-[11px] font-bold mb-3 tracking-widest uppercase">
+        Payment Status Values
       </div>
 
       {[
-        ["CREATED",  "#58A6FF", "Payment order created, awaiting customer"],
-        ["PENDING",   "#D29922", "Awaiting customer payment"],
-        ["SUCCESS",   "#3FB950", "Payment received and confirmed"],
-        ["FAILED",    "#F85149", "Payment failed or rejected"],
-        ["EXPIRED",   "#8B949E", "Customer didn't pay in time"],
-        ["CANCELLED", "#8B949E", "Cancelled via API"],
+        ["CREATED",   "text-blue-600", "Payment order created, awaiting customer"],
+        ["PENDING",   "text-amber-600", "Awaiting customer payment"],
+        ["SUCCESS",   "text-emerald-600", "Payment received and confirmed"],
+        ["FAILED",    "text-red-600", "Payment failed or rejected"],
+        ["EXPIRED",   "text-gray-500", "Customer didn't pay in time"],
+        ["CANCELLED", "text-gray-500", "Cancelled via API"],
       ].map(([s, c, d]) => (
-        <div key={s} style={{
-          display: "flex", alignItems: "center", gap: 12,
-          padding: "8px 14px", marginBottom: 4,
-          background: "#0D1117", borderRadius: 6,
-          border: "1px solid #21262D"
-        }}>
-          <span style={{
-            minWidth: 90, fontFamily: "monospace", fontSize: 12,
-            fontWeight: 700, color: c
-          }}>{s}</span>
-          <span style={{ color: "#8B949E", fontSize: 13 }}>{d}</span>
+        <div key={s} className="flex items-center gap-3 p-2.5 mb-2 bg-gray-50 border border-gray-200 rounded-lg">
+          <span className={`min-w-[90px] font-mono text-[12px] font-bold ${c}`}>
+            {s}
+          </span>
+          <span className="text-gray-600 text-[13px]">{d}</span>
         </div>
       ))}
 
       <Note type="warning">
-        If you send the same <code style={{ color: "#D29922" }}>order_id</code> twice, Paynexa returns the existing payment (HTTP 200) instead of creating a duplicate — handle this in your code.
+        If you send the same <code className="text-amber-800 bg-amber-100/50 px-1.5 py-0.5 rounded font-mono text-[12px]">order_id</code> twice, Paynexa returns the existing payment (HTTP 200) instead of creating a duplicate — handle this in your code.
       </Note>
     </div>
   );
@@ -200,24 +176,24 @@ function HandleResponse() {
 function CallbackURL() {
   return (
     <div>
-      <p style={{ color: "#8B949E", fontSize: 14, marginTop: 0, marginBottom: 20 }}>
-        When a payment reaches a final state, Paynexa sends <strong>two consecutive POST requests</strong> to your providing <code>callback_url</code>:
+      <p className="text-gray-600 text-[14px] mt-0 mb-5 leading-relaxed">
+        When a payment reaches a final state, Paynexa sends <strong className="text-gray-900">two consecutive POST requests</strong> to your provided <code>callback_url</code>:
       </p>
 
-      <div style={{ marginBottom: 24 }}>
+      <div className="mb-6">
         <Note type="info">
-          1. <strong>Standard Notification</strong>: Formatted Paynexa response (see below).<br/>
-          2. <strong>Raw Provider Callback</strong>: The exact payload received from the payment gateway.
+          1. <strong className="text-blue-900">Standard Notification</strong>: Formatted Paynexa response (see below).<br/>
+          2. <strong className="text-blue-900">Raw Provider Callback</strong>: The exact payload received from the payment gateway.
         </Note>
       </div>
 
       <div>
         <Step n="1" title="Register Callback URL">
-          Pass the <code style={{ color: "#58A6FF" }}>callback_url</code> parameter when creating the order. Paynexa will automatically send the payment status to this endpoint.
+          Pass the <code className="text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded font-mono text-[12px]">callback_url</code> parameter when creating the order. Paynexa will automatically send the payment status to this endpoint.
         </Step>
         
         <Step n="2" title="Success Response">
-          For successful payments, we POST the status along with the <strong>UTR number</strong> and complete transaction details.
+          For successful payments, we POST the status along with the <strong className="text-gray-900">UTR number</strong> and complete transaction details.
         </Step>
 
         <Code lang="json — callback (SUCCESS)">{`{
@@ -232,7 +208,7 @@ function CallbackURL() {
 }`}</Code>
 
         <Step n="3" title="Failure Response">
-          If the payment fails, we pass the <code>payment failed</code> status to your endpoint.
+          If the payment fails, we pass the <code className="text-gray-600 font-mono text-[12px]">payment failed</code> status to your endpoint.
         </Step>
 
         <Code lang="json — callback (FAILED)">{`{
@@ -247,21 +223,21 @@ function CallbackURL() {
 }`}</Code>
 
         <Note type="info">
-          Ensure your endpoint is prepared to receive JSON data via POST and returns an <strong>HTTP 200</strong> response to acknowledge receipt.
+          Ensure your endpoint is prepared to receive JSON data via POST and returns an <strong className="text-blue-900">HTTP 200</strong> response to acknowledge receipt.
         </Note>
       </div>
 
-      <div style={{ marginTop: 32, borderTop: "1px solid #21262D", paddingTop: 24 }}>
-        <p style={{ color: "#CDD9E5", fontSize: 14, fontWeight: 600, marginBottom: 12 }}>
+      <div className="mt-8 border-t border-gray-200 pt-6">
+        <p className="text-gray-900 text-[14px] font-bold mb-2">
           REST API ENQUIRY (Polling)
         </p>
-        <p style={{ color: "#8B949E", fontSize: 13, marginBottom: 20 }}>
+        <p className="text-gray-600 text-[13px] mb-5">
           You can also manually enquire about the status using a GET request if needed.
         </p>
 
-        <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+        <div className="flex items-center mb-2">
           {badge("GET")}
-          <span style={{ fontFamily: "monospace", fontSize: 14, color: "#3FB950" }}>
+          <span className="font-mono text-[14px] font-semibold text-gray-900">
             /api/payments/:payment_id
           </span>
         </div>
@@ -278,27 +254,27 @@ function GetTransaction() {
   const [mode, setMode] = useState("id");
   return (
     <div>
-      <p style={{ color: "#8B949E", fontSize: 14, marginTop: 0, marginBottom: 20 }}>
+      <p className="text-gray-600 text-[14px] mt-0 mb-5 leading-relaxed">
         Two ways to look up transaction details — by payment ID or by date (for reconciliation).
       </p>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+      <div className="flex gap-2 mb-6 bg-gray-100/50 p-1.5 rounded-xl border border-gray-200">
         {[["id", "By Payment ID"], ["date", "By Date"]].map(([k, l]) => (
-          <button key={k} onClick={() => setMode(k)} style={{
-            padding: "7px 18px", borderRadius: 6, cursor: "pointer",
-            fontWeight: 600, fontSize: 13, border: "none",
-            background: mode === k ? "#1F6FEB" : "#21262D",
-            color: mode === k ? "#fff" : "#8B949E",
-            transition: "all 0.2s"
-          }}>{l}</button>
+          <button key={k} onClick={() => setMode(k)} className={`
+            px-4 py-2 rounded-lg cursor-pointer font-semibold text-[13px] transition-all
+            ${mode === k 
+              ? 'bg-white text-emerald-600 shadow-sm border border-gray-200/50' 
+              : 'bg-transparent text-gray-500 border border-transparent hover:text-gray-700'
+            }
+          `}>{l}</button>
         ))}
       </div>
 
       {mode === "id" && (
         <div>
-          <div style={{ display: "flex", alignItems: "center", marginBottom: 10 }}>
+          <div className="flex items-center mb-2.5">
             {badge("GET")}
-            <span style={{ fontFamily: "monospace", fontSize: 14, color: "#3FB950" }}>
+            <span className="font-mono text-[14px] font-semibold text-gray-900">
               /api/payments/:payment_id
             </span>
           </div>
@@ -329,14 +305,14 @@ const { data } = await res.json();`}</Code>
 
 {mode === "date" && (
   <div>
-    <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
+    <div className="flex items-center mb-1.5">
       {badge("POST")}
-      <span style={{ fontFamily: "monospace", fontSize: 14, color: "#58A6FF" }}>
+      <span className="font-mono text-[14px] font-semibold text-gray-900">
         /api/payments/date-wise-payment
       </span>
     </div>
-    <p style={{ color: "#8B949E", fontSize: 13, margin: "8px 0 12px" }}>
-      Look up transactions by <code style={{ color: "#58A6FF" }}>order_id</code> or <code style={{ color: "#58A6FF" }}>txn_date</code>. At least one is required.
+    <p className="text-gray-600 text-[13px] my-2 mb-3">
+      Look up transactions by <code className="text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded font-mono text-[12px]">order_id</code> or <code className="text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded font-mono text-[12px]">txn_date</code>. At least one is required.
     </p>
 
     <Code lang="javascript">{`const res = await fetch(
@@ -375,17 +351,17 @@ const data = await res.json();`}</Code>
 }`}</Code>
 
     <Note type="info">
-      If no matching transaction is found, <code style={{ color: "#58A6FF" }}>total</code> returns <code style={{ color: "#58A6FF" }}>0</code> and <code style={{ color: "#58A6FF" }}>payments</code> returns an empty array — not an error.
+      If no matching transaction is found, <code className="text-blue-700 font-mono text-[12px]">total</code> returns <code className="text-blue-700 font-mono text-[12px]">0</code> and <code className="text-blue-700 font-mono text-[12px]">payments</code> returns an empty array — not an error.
     </Note>
   </div>
 )}
-      <div style={{ marginTop: 28 }}>
-        <div style={{ color: "#CDD9E5", fontSize: 13, fontWeight: 600, marginBottom: 12, letterSpacing: 0.5 }}>
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="text-gray-900 text-[14px] font-bold mb-3 tracking-wide">
           LIST ALL PAYMENTS
         </div>
-        <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+        <div className="flex items-center mb-2">
           {badge("GET")}
-          <span style={{ fontFamily: "monospace", fontSize: 14, color: "#3FB950" }}>
+          <span className="font-mono text-[14px] font-semibold text-gray-900 break-all">
             /api/payments?status=SUCCESS&page=1&limit=20
           </span>
         </div>
@@ -402,93 +378,73 @@ const data = await res.json();`}</Code>
 // ─── ROOT ──────────────────────────────────────────────────────────────────────
 
 export default function PaynexaDocs() {
+  const { setSidebarOpen } = useOutletContext();
   const [tab, setTab] = useState(0);
 
   const content = [<CreateOrder />, <HandleResponse />, <CallbackURL />, <GetTransaction />];
 
   return (
-    <div style={{
-      minHeight: "100%",
-      background: "#010409",
-      fontFamily: "'Inter', 'Segoe UI', sans-serif",
-      padding: "40px 16px"
-    }}>
-      <div style={{ maxWidth: 840, margin: "0 auto" }}>
+    <div className="min-h-screen bg-gray-50/50 font-sans py-10 px-4">
+      <div className="max-w-[840px] mx-auto">
           {/* Header */}
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: 8,
-                background: "linear-gradient(135deg, #1F6FEB, #6366F1)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 16, fontWeight: 900, color: "#fff"
-              }}>P</div>
-              <span style={{ fontSize: 20, fontWeight: 800, color: "#F0F6FF", letterSpacing: -0.5 }}>
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-3">
+              <button 
+                onClick={() => setSidebarOpen(true)}
+                className="bg-transparent border-none cursor-pointer text-gray-500 p-1 flex items-center lg:hidden hover:text-gray-900"
+              >
+                <Menu size={20} />
+              </button>
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-[16px] font-black text-white shadow-sm shadow-emerald-500/20">
+                P
+              </div>
+              <span className="text-[22px] font-bold text-gray-900 tracking-tight">
                 Paynexa
               </span>
-              <span style={{
-                fontSize: 11, fontWeight: 600, color: "#58A6FF",
-                background: "#0D2137", border: "1px solid #1D6FA4",
-                padding: "2px 8px", borderRadius: 20
-              }}>API DOCS</span>
+              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full ml-1 uppercase tracking-wider">
+                API Docs
+              </span>
             </div>
-            <p style={{ color: "#8B949E", fontSize: 14, margin: 0, lineHeight: 1.6 }}>
-              Base URL: <code style={{ color: "#58A6FF", background: "#0D1117", padding: "2px 8px", borderRadius: 4 }}>
+            <p className="text-gray-500 text-[14px] m-0 leading-relaxed">
+              Base URL: <code className="text-gray-600 font-bold bg-white border border-gray-200 px-2 py-0.5 rounded-md shadow-sm ml-1 mr-2">
                 {BASE_URL}
               </code>
-              <span style={{ margin: "0 10px", opacity: 0.3 }}>|</span>
-              Auth: <code style={{ color: "#7EE787", background: "#0D1117", padding: "2px 8px", borderRadius: 4 }}>
+              <span className="opacity-30 mx-1 border-l border-gray-400 h-4 inline-block align-middle"></span>
+              <span className="ml-2">Auth:</span> <code className="text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md shadow-sm ml-1">
                 Bearer Token
               </code>
             </p>
           </div>
 
           {/* Tab Bar */}
-          <div style={{ marginBottom: 24 }}>
-            <div style={{
-              display: "flex", gap: 4,
-              background: "#0D1117", border: "1px solid #21262D",
-              borderRadius: 10, padding: 4, flexWrap: "wrap",
-              overflowX: "auto"
-            }}>
+          <div className="mb-6">
+            <div className="flex gap-1.5 bg-gray-100/50 border border-gray-200 rounded-xl p-1.5 flex-wrap overflow-x-auto shadow-inner">
               {TABS.map((t, i) => (
-                <button key={t} onClick={() => setTab(i)} style={{
-                  flex: "1 1 auto",
-                  padding: "9px 14px", borderRadius: 7, cursor: "pointer",
-                  fontWeight: 600, fontSize: 13, border: "none",
-                  background: tab === i
-                    ? "linear-gradient(135deg, #1F6FEB22, #6366F122)"
-                    : "transparent",
-                  color: tab === i ? "#58A6FF" : "#8B949E",
-                  transition: "all 0.15s",
-                  boxShadow: tab === i ? "0 0 0 1px #1D6FA4" : "none",
-                  whiteSpace: "nowrap"
-                }}>{t}</button>
+                <button key={t} onClick={() => setTab(i)} className={`
+                  flex-1 min-w-max px-3.5 py-2 rounded-lg cursor-pointer font-semibold text-[13px] transition-all whitespace-nowrap
+                  ${tab === i
+                    ? "bg-white text-emerald-600 shadow-sm border border-gray-200/60"
+                    : "bg-transparent text-gray-500 border border-transparent hover:text-gray-700 hover:bg-gray-100/50"
+                  }
+                `}>{t}</button>
               ))}
             </div>
           </div>
 
           {/* Content Card */}
-          <div style={{
-            background: "#0D1117", border: "1px solid #21262D",
-            borderRadius: 12, padding: "28px", marginBottom: 20
-          }}>
-            <div style={{
-              fontSize: 18, fontWeight: 800, color: "#F0F6FF",
-              marginBottom: 20, letterSpacing: -0.3
-            }}>{TABS[tab]}</div>
+          <div className="bg-white border border-gray-200 rounded-2xl p-7 mb-6 shadow-sm">
+            <div className="text-[18px] font-bold text-gray-900 mb-6 tracking-tight">
+              {TABS[tab]}
+            </div>
             {content[tab]}
           </div>
 
           {/* Quick steps footer */}
-          <div style={{
-            background: "#0D1117", border: "1px solid #21262D",
-            borderRadius: 12, padding: "20px 28px"
-          }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#565f69", letterSpacing: 1.5, marginBottom: 20, textAlign: "center", textTransform: "uppercase" }}>
-              INTEGRATION WORKFLOW
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div className="text-[11px] font-bold text-gray-400 tracking-widest mb-5 text-center uppercase">
+              Integration Workflow
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+            <div className="flex justify-between gap-3 flex-wrap">
               {[
                 ["1", "API Token", "Merchant settings"],
                 ["2", "Create",  "POST /create"],
@@ -496,15 +452,12 @@ export default function PaynexaDocs() {
                 ["4", "Callback",  "POST handler"],
                 ["5", "Fulfil",  "Order success"],
               ].map(([n, t, s]) => (
-                <div key={n} style={{ flex: "1 1 auto", minWidth: 120, textAlign: "center", marginBottom: 15 }}>
-                  <div style={{
-                    width: 32, height: 32, borderRadius: "50%",
-                    background: "linear-gradient(135deg, #1F6FEB, #6366F1)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 13, fontWeight: 800, color: "#fff", margin: "0 auto 8px"
-                  }}>{n}</div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#CDD9E5", marginBottom: 2 }}>{t}</div>
-                  <div style={{ fontSize: 11, color: "#8B949E" }}>{s}</div>
+                <div key={n} className="flex-1 min-w-[100px] text-center mb-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[13px] font-bold text-emerald-700 mx-auto mb-2 shadow-sm">
+                    {n}
+                  </div>
+                  <div className="text-[13px] font-bold text-gray-900 mb-0.5">{t}</div>
+                  <div className="text-[11px] font-medium text-gray-500">{s}</div>
                 </div>
               ))}
             </div>

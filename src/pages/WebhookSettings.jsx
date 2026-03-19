@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { Webhook, Save, ExternalLink, CheckCircle2, Info } from 'lucide-react';
 import { getMerchantProfile, updateWebhookUrl } from '../services/api';
 import { SectionHeader, PageLoader } from '../components/ui';
 import Header from '../components/Header';
 
 export default function WebhookSettings() {
+  const { setSidebarOpen } = useOutletContext();
   const [profile, setProfile] = useState(null);
+// ... existing states ...
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -34,14 +37,18 @@ export default function WebhookSettings() {
 
   if (loading) return (
     <>
-      <Header title="Webhook Settings" />
+      <Header title="Webhook Settings" onMenuClick={() => setSidebarOpen(true)} />
       <div className="p-6"><PageLoader /></div>
     </>
   );
 
   return (
     <>
-      <Header title="Webhook Settings" subtitle="Configure payment event callbacks" />
+      <Header 
+        title="Webhook Settings" 
+        subtitle="Configure payment event callbacks" 
+        onMenuClick={() => setSidebarOpen(true)}
+      />
       <div className="p-6 page-enter max-w-2xl space-y-5">
         <SectionHeader title="Webhook Configuration" subtitle="We'll send payment events to your endpoint" />
 

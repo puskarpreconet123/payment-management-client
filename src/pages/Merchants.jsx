@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { Plus, UserPlus, Eye, ToggleLeft, ToggleRight, Copy, CreditCard } from 'lucide-react';
 import { getMerchants, createMerchant, updateMerchantStatus, getMids, assignMids } from '../services/api';
 import { StatusBadge, Modal, Pagination, EmptyState, SectionHeader, PageLoader, CopyButton } from '../components/ui';
 import Header from '../components/Header';
 
 export default function Merchants() {
+  const { setSidebarOpen } = useOutletContext();
   const [merchants, setMerchants] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(() => parseInt(localStorage.getItem('rf_limit_pref')) || 15);
+// ... existing states ...
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [showAssign, setShowAssign] = useState(null);
@@ -17,15 +21,21 @@ export default function Merchants() {
   const [err, setErr] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const load = async (p = 1) => {
+  const load = async (p = page, l = limit) => {
     setLoading(true);
-    const res = await getMerchants({ page: p, limit: 15 });
+    const res = await getMerchants({ page: p, limit: l });
     setMerchants(res.data.data.merchants);
     setTotal(res.data.data.total);
     setLoading(false);
   };
 
-  useEffect(() => { load(page); }, [page]);
+  useEffect(() => { load(page, limit); }, [page, limit]);
+
+  const handleLimitChange = (l) => {
+    setLimit(l);
+    setPage(1);
+    localStorage.setItem('rf_limit_pref', l);
+  };
 
   const handleCreate = async (e) => {
     e.preventDefault(); setErr(''); setSaving(true);
@@ -44,11 +54,26 @@ export default function Merchants() {
     load(page);
   };
 
-  const openAssign = async (m) => {
-    setShowAssign(m);
-    setSelectedMids(m.mids?.map(mid => mid._id || mid) || []);
-    const res = await getMids();
-    setMids(res.data.data);
+ const openAssign = async (m) => {
+    try {
+      setShowAssign(m);
+      setSelectedMids(m.mids?.map(mid => mid._id || mid) || []);
+      const res = await getMids();
+      
+      // Log this to see the actual shape of your data!
+      console.log("MIDs API Response:", res.data); 
+      
+      // Update this line based on your actual API response structure.
+      // If the array is inside a 'mids' property, use res.data.data.mids
+      const midsArray = res.data?.data?.mids || res.data?.data || []; 
+      
+      // Ensure we only ever set an array into state
+      setMids(Array.isArray(midsArray) ? midsArray : []); 
+
+    } catch (error) {
+      console.error("Failed to fetch MIDs:", error);
+      setShowAssign(null);
+    }
   };
 
   const handleAssign = async () => {
@@ -61,7 +86,11 @@ export default function Merchants() {
 
   return (
     <>
-      <Header title="Merchants" subtitle="Manage all registered merchants" />
+      <Header 
+        title="Merchants" 
+        subtitle="Manage all registered merchants" 
+        onMenuClick={() => setSidebarOpen(true)}
+      />
       <div className="p-6 page-enter">
         <SectionHeader
           title="Merchants"
@@ -131,7 +160,13 @@ export default function Merchants() {
                   </tbody>
                 </table>
               </div>
-              <Pagination page={page} total={total} limit={15} onChange={setPage} />
+              <Pagination 
+                page={page} 
+                total={total} 
+                limit={limit} 
+                onChange={setPage} 
+                onLimitChange={handleLimitChange} 
+              />
             </>
           )}
         </div>
@@ -144,7 +179,7 @@ export default function Merchants() {
               { label: 'Merchant Name', key: 'name', type: 'text', placeholder: 'Acme Corp' },
               { label: 'Email Address', key: 'email', type: 'email', placeholder: 'contact@acme.com' },
               { label: 'Password', key: 'password', type: 'password', placeholder: '••••••••' },
-              { label: 'Webhook URL', key: 'webhook_url', type: 'url', placeholder: 'https://yourdomain.com/callback' },
+              { label: 'Callback URL', key: 'webhook_url', type: 'url', placeholder: 'https://yourdomain.com/callback' },
             ].map(f => (
               <div key={f.key}>
                 <label className="label">{f.label}</label>
@@ -172,10 +207,10 @@ export default function Merchants() {
           <div className="space-y-3">
             <p className="text-sm text-slate-400">Select MIDs to assign to this merchant.</p>
             <div className="space-y-2 max-h-56 overflow-y-auto">
-              {mids.map(mid => (
+              {(Array.isArray(mids) ? mids : []).map(mid => (
                 <label key={mid._id} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer border transition-all ${
                   selectedMids.includes(mid._id)
-                    ? 'border-emerald-700/50 bg-emerald-900/15'
+                    ? 'border-emerald-700/50 bg-emerald-50'
                     : 'border-white/5 bg-white/2 hover:border-white/10'
                 }`}>
                   <input

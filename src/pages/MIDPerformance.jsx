@@ -1,30 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { Clock, BarChart3, TrendingUp, AlertCircle } from 'lucide-react';
 import { getMidPerformance } from '../services/api';
-import { SectionHeader, PageLoader, EmptyState } from '../components/ui';
+import { SectionHeader, PageLoader, EmptyState, Pagination } from '../components/ui';
 import Header from '../components/Header';
 
 export default function MIDPerformance() {
+  const { setSidebarOpen } = useOutletContext();
   const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(() => parseInt(localStorage.getItem('rf_limit_pref')) || 15);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const loadData = async () => {
+  const loadData = useCallback(async (p = page, l = limit) => {
     setLoading(true);
     setError('');
     try {
-      const res = await getMidPerformance();
-      setData(res.data.data);
+      const res = await getMidPerformance({ page: p, limit: l });
+      const items = res.data?.data?.mids || res.data?.data?.data || res.data?.data;
+      setData(Array.isArray(items) ? items : []);
+      setTotal(res.data?.data?.total || (Array.isArray(items) ? items.length : 0));
     } catch (e) {
       console.error('Failed to load performance data', e);
       setError('Failed to load real-time analytics. Please try again later.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [page, limit]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
+
+  const handleLimitChange = (l) => {
+    setLimit(l);
+    setPage(1);
+    localStorage.setItem('rf_limit_pref', l);
+  };
 
   const getStatusColor = (rate) => {
     if (rate >= 90) return 'text-emerald-400';
@@ -37,13 +51,17 @@ export default function MIDPerformance() {
 
   return (
     <>
-      <Header title="MID Performance" subtitle="Real-time transaction success rate monitoring" />
+      <Header 
+        title="MID Performance" 
+        subtitle="Real-time transaction success rate monitoring" 
+        onMenuClick={() => setSidebarOpen(true)}
+      />
       <div className="p-6 page-enter">
         <SectionHeader
           title="Performance Analytics"
           subtitle="Success rates across different time intervals"
           action={
-            <button onClick={loadData} className="btn-secondary flex items-center gap-2">
+            <button onClick={() => loadData()} className="btn-secondary flex items-center gap-2">
               <Clock size={14} /> Refresh Data
             </button>
           }
@@ -109,14 +127,15 @@ export default function MIDPerformance() {
                       <tr key={mid._id} className="hover:bg-white/5 transition-colors">
                         <td className="py-4">
                           <div className="flex flex-col">
-                            <span className="text-sm font-bold text-slate-100">{mid.mid_code}</span>
+                            <span className="text-sm font-bold text-white">{mid.mid_code}</span>
                             <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">
                               {mid.provider}
                             </span>
                           </div>
                         </td>
                         {getTimeRanges().map((range) => {
-                          const stats = mid.stats[range] || { success_rate: 0, success: 0, total: 0 };
+                          // Standard JS comment here instead of JSX comment!
+                          const stats = mid?.stats?.[range] || { success_rate: 0, success: 0, total: 0 };
                           return (
                             <td key={range} className="text-center py-4">
                               <div className="flex flex-col items-center">
@@ -139,6 +158,13 @@ export default function MIDPerformance() {
                 </tbody>
               </table>
             </div>
+            <Pagination 
+              page={page} 
+              total={total} 
+              limit={limit} 
+              onChange={setPage} 
+              onLimitChange={handleLimitChange} 
+            />
           </div>
         )}
       </div>

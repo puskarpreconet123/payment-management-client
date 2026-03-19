@@ -1,7 +1,8 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, PlusCircle, ArrowLeftRight,
-  KeyRound, Webhook, LogOut, ChevronRight, BookOpen
+  KeyRound, Webhook, LogOut, ChevronRight, BookOpen,
+  X
 } from 'lucide-react';
 import { Logo } from './ui';
 import { useAuth } from '../context/AuthContext';
@@ -15,18 +16,26 @@ const links = [
   { to: '/merchant/docs', icon: BookOpen, label: 'Documentation' },
 ];
 
-export default function MerchantSidebar() {
+export default function MerchantSidebar({ onClose }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const handleLogout = () => { logout(); navigate('/merchant/login'); };
 
   return (
-    <aside className="w-56 min-h-screen flex flex-col bg-navy-900 border-r border-white/5 relative">
+    <aside className="w-56 h-full flex flex-col bg-[#0a0a0b] border-r border-white/5 relative">
       <div className="absolute top-0 right-0 w-px h-full bg-gradient-to-b from-transparent via-emerald-800/30 to-transparent pointer-events-none" />
 
-      <div className="p-5 border-b border-white/5">
+      <div className="p-5 border-b border-white/5 flex items-center justify-between">
         <Logo />
-        <div className="mt-3 flex items-center gap-1.5">
+        <button 
+          onClick={onClose}
+          className="lg:hidden p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+        >
+          <X size={18} />
+        </button>
+      </div>
+      <div className="px-5 py-2">
+        <div className="flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse-slow" />
           <span className="text-xs text-slate-500">Merchant Portal</span>
         </div>
@@ -39,6 +48,7 @@ export default function MerchantSidebar() {
             key={to}
             to={to}
             end={to === '/merchant'}
+            onClick={onClose}
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
           >
             <Icon size={15} />

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useOutletContext, Link } from 'react-router-dom';
 import { ArrowLeftRight, CheckCircle2, Clock, XCircle, TrendingUp, ExternalLink } from 'lucide-react';
 import { getMerchantTransactions, getMerchantProfile } from '../services/api';
 import { StatsCard, StatusBadge, SectionHeader, PageLoader } from '../components/ui';
 import Header from '../components/Header';
-import { Link } from 'react-router-dom';
 
 export default function MerchantDashboard() {
+  const { setSidebarOpen } = useOutletContext();
   const [stats, setStats] = useState(null);
   const [recent, setRecent] = useState([]);
   const [profile, setProfile] = useState(null);
@@ -19,10 +20,10 @@ export default function MerchantDashboard() {
       const txData = txRes.data.data;
       const payments = txData.payments || [];
       const total = txData.total || 0;
-      const success = payments.filter(p => p.status === 'SUCCESS').length;
-      const failed = payments.filter(p => p.status === 'FAILED').length;
-      const pending = payments.filter(p => ['CREATED','PENDING'].includes(p.status)).length;
-
+      const success = txData.success_count || 0;
+      const failed = txData.failed_count || 0;
+      const pending = txData.pending_count || 0;
+      console.log(txRes.data, profileRes.data)
       setStats({ total, success, failed, pending });
       setRecent(payments.slice(0, 6));
       setProfile(profileRes.data.data);
@@ -31,14 +32,14 @@ export default function MerchantDashboard() {
 
   if (loading) return (
     <>
-      <Header title="Dashboard" />
+      <Header title="Dashboard" onMenuClick={() => setSidebarOpen(true)} />
       <div className="p-6"><PageLoader /></div>
     </>
   );
 
   return (
     <>
-      <Header title="Dashboard" subtitle={profile?.name} />
+      <Header title="Dashboard" subtitle={profile?.name} onMenuClick={() => setSidebarOpen(true)} />
       <div className="p-6 space-y-6 page-enter">
 
         {/* Welcome Banner */}

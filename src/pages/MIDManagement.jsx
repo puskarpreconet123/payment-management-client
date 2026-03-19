@@ -1,23 +1,29 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { Plus, CreditCard, ToggleLeft, ToggleRight, BarChart3 } from 'lucide-react';
 import { getMids, createMid, updateMidStatus } from '../services/api';
-import { StatusBadge, Modal, EmptyState, SectionHeader, PageLoader } from '../components/ui';
+import { StatusBadge, Modal, Pagination, EmptyState, SectionHeader, PageLoader } from '../components/ui';
 import Header from '../components/Header';
 
 const PROVIDERS = ['rupeeflow', 'cgpey'];
 
+const INITIAL_FORM_STATE = {
+  mid_code: '', provider: 'rupeeflow', api_key: '', api_secret: '',
+  webhook_secret: '', upi_id: '', merchant_name: ''
+};
+
 export default function MIDManagement() {
+  const { setSidebarOpen } = useOutletContext();
   const navigate = useNavigate();
   const [mids, setMids] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(() => parseInt(localStorage.getItem('rf_limit_pref')) || 15);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
-  const [form, setForm] = useState({
-    mid_code: '', provider: 'rupeeflow', api_key: '', api_secret: '',
-    webhook_secret: '', upi_id: '', merchant_name: ''
-  });
+  const [form, setForm] = useState(INITIAL_FORM_STATE);
 
   const getPlaceholder = (field) => {
     if (field === 'api_key') {
@@ -37,38 +43,73 @@ export default function MIDManagement() {
     return '';
   };
 
-  const load = async () => {
+  // Wrapped in useCallback for useEffect dependency array
+  const load = useCallback(async (p = page, l = limit) => {
     setLoading(true);
-    const res = await getMids();
-    setMids(res.data.data);
-    setLoading(false);
+    try {
+      const res = await getMids({ page: p, limit: l });
+      const items = res.data?.data?.mids || res.data?.data?.data || res.data?.data;
+      setMids(Array.isArray(items) ? items : []);
+      setTotal(res.data?.data?.total || (Array.isArray(items) ? items.length : 0));
+    } catch (e) {
+      console.error('Failed to load MIDs', e);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, limit]);
+
+  useEffect(() => { 
+    load(); 
+  }, [load]);
+
+  const closeCreateModal = () => {
+    setShowCreate(false);
+    setForm(INITIAL_FORM_STATE);
+    setErr('');
   };
 
-  useEffect(() => { load(); }, []);
-
   const handleCreate = async (e) => {
-    e.preventDefault(); setErr(''); setSaving(true);
+    e.preventDefault(); 
+    setErr(''); 
+    setSaving(true);
     try {
       await createMid(form);
-      setShowCreate(false);
-      setForm({ mid_code: '', provider: 'rupeeflow', api_key: '', api_secret: '', webhook_secret: '', upi_id: '', merchant_name: '' });
-      load();
-    } catch (e) { setErr(e.response?.data?.message || 'Failed to create MID'); }
-    setSaving(false);
+      closeCreateModal();
+      load(1, limit); // Jump back to page 1 to see the new MID
+    } catch (e) { 
+      setErr(e.response?.data?.message || 'Failed to create MID'); 
+    } finally {
+      setSaving(false);
+    }
   };
 
   const toggleStatus = async (mid) => {
-    await updateMidStatus(mid._id, mid.status === 'active' ? 'inactive' : 'active');
-    load();
+    try {
+      await updateMidStatus(mid._id, mid.status === 'active' ? 'inactive' : 'active');
+      load(); // Reload the current page to reflect changes
+    } catch (error) {
+      console.error('Failed to update MID status', error);
+      // Optional: Add a toast notification here to tell the user it failed
+    }
+  };
+
+  const handleLimitChange = (l) => {
+    setLimit(l);
+    setPage(1);
+    localStorage.setItem('rf_limit_pref', l);
   };
 
   return (
     <>
-      <Header title="MID Management" subtitle="Manage merchant IDs and provider connections" />
+      <Header 
+        title="MID Management" 
+        subtitle="Manage merchant IDs and provider connections" 
+        onMenuClick={() => setSidebarOpen(true)}
+      />
       <div className="p-6 page-enter">
         <SectionHeader
           title="Merchant IDs (MIDs)"
-          subtitle={`${mids.length} configured`}
+          subtitle={`${total} configured`}
           action={
             <div className="flex gap-3">
               <button
@@ -133,11 +174,18 @@ export default function MIDManagement() {
                 </tbody>
               </table>
             </div>
+            <Pagination 
+              page={page} 
+              total={total} 
+              limit={limit} 
+              onChange={setPage} 
+              onLimitChange={handleLimitChange} 
+            />
           </div>
         )}
 
         {/* Create MID Modal */}
-        <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Create New MID" maxWidth="max-w-xl">
+        <Modal open={showCreate} onClose={closeCreateModal} title="Create New MID" maxWidth="max-w-xl">
           <form onSubmit={handleCreate} className="space-y-4">
             {err && <div className="text-red-400 text-sm bg-red-900/20 border border-red-800/40 rounded-lg p-3">{err}</div>}
 
@@ -191,7 +239,7 @@ export default function MIDManagement() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => setShowCreate(false)} className="btn-secondary flex-1">Cancel</button>
+              <button type="button" onClick={closeCreateModal} className="btn-secondary flex-1">Cancel</button>
               <button type="submit" disabled={saving} className="btn-primary flex-1">
                 {saving ? 'Creating…' : 'Create MID'}
               </button>

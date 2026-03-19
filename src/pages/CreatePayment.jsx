@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { Zap, ArrowRight, QrCode, IndianRupee, Copy, CheckCircle2, RefreshCw } from 'lucide-react';
 import { createPayment } from '../services/api';
 import { SectionHeader } from '../components/ui';
 import Header from '../components/Header';
 
 export default function CreatePayment() {
+  const { setSidebarOpen } = useOutletContext();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     amount: '', order_id: '', customer_name: '',
@@ -39,27 +40,35 @@ export default function CreatePayment() {
 
   return (
     <>
-      <Header title="Create Payment" subtitle="Generate a new UPI payment link" />
-      <div className="p-6 page-enter max-w-2xl">
+      <Header 
+        title="Create Payment" 
+        subtitle="Generate a new UPI payment link" 
+        onMenuClick={() => setSidebarOpen(true)}
+      />
+        <div className="centered-content-wrapper page-enter px-6 bg-gray-50/50 min-h-screen pt-6">
+          <div className="w-full max-w-2xl mx-auto">
         <SectionHeader
           title="New Payment"
           subtitle="Fill in the details to generate a UPI payment link"
         />
 
-        <div className="glass-card p-6">
+        {/* Changed from glass-card to a clean white card with subtle shadows */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           {/* Header accent */}
-          <div className="flex items-center gap-3 mb-6 pb-5 border-b border-white/5">
-            <div className="p-3 rounded-xl bg-emerald-900/30 border border-emerald-800/30">
-              <QrCode size={20} className="text-emerald-400" />
+          <div className="flex items-center gap-3 mb-6 pb-5 border-b border-gray-100">
+            {/* Swapped emerald/dark backgrounds for a clean emerald enterprise accent */}
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+              <QrCode size={20} className="text-emerald-600" />
             </div>
             <div>
-              <div className="text-sm font-semibold text-white">UPI Payment Order</div>
-              <div className="text-xs text-slate-500">Generates a QR code and UPI deep link</div>
+              <div className="text-sm font-semibold text-gray-900">UPI Payment Order</div>
+              <div className="text-xs text-gray-500">Generates a QR code and UPI deep link</div>
             </div>
           </div>
 
           {err && (
-            <div className="text-red-400 text-sm bg-red-900/20 border border-red-800/40 rounded-lg p-3 mb-5">
+            // Updated error state to a clean light red theme
+            <div className="text-red-700 text-sm bg-red-50 border border-red-200 rounded-lg p-3 mb-5">
               {err}
             </div>
           )}
@@ -68,15 +77,15 @@ export default function CreatePayment() {
             {/* Amount + Order ID */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="label">Amount (INR)</label>
+                <label className="label text-gray-700 font-medium mb-1 block text-sm">Amount (INR)</label>
                 <div className="relative">
-                  <IndianRupee size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <IndianRupee size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="number"
                     placeholder="500.00"
                     step="0.01"
                     min="1"
-                    className="input-field !pl-8 font-mono"
+                    className="input-field !pl-8 font-mono bg-white border border-gray-300 text-gray-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 w-full rounded-lg px-3 py-2 transition-all"
                     value={form.amount}
                     onChange={e => f('amount', e.target.value)}
                     required
@@ -84,11 +93,11 @@ export default function CreatePayment() {
                 </div>
               </div>
               <div>
-                <label className="label">Order ID</label>
+                <label className="label text-gray-700 font-medium mb-1 block text-sm">Order ID</label>
                 <input
                   type="text"
                   placeholder="ORD_20240601_001"
-                  className="input-field font-mono text-sm"
+                  className="input-field font-mono text-sm bg-white border border-gray-300 text-gray-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 w-full rounded-lg px-3 py-2 transition-all"
                   value={form.order_id}
                   onChange={e => f('order_id', e.target.value)}
                   required
@@ -99,40 +108,40 @@ export default function CreatePayment() {
             {/* Optional URLs */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="label">CallBack URL (Optional)</label>
+                <label className="label text-gray-700 font-medium mb-1 block text-sm">CallBack URL (Optional)</label>
                 <input
                   type="url"
                   placeholder="https://merchant.com/api/callback"
-                  className="input-field font-mono text-xs"
+                  className="input-field font-mono text-xs bg-white border border-gray-300 text-gray-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 w-full rounded-lg px-3 py-2 transition-all"
                   value={form.webhook_url}
                   onChange={e => f('webhook_url', e.target.value)}
                 />
               </div>
               <div>
-                <label className="label">Redirect URL (Optional)</label>
+                <label className="label text-gray-700 font-medium mb-1 block text-sm">Redirect URL (Optional)</label>
                 <input
                   type="url"
                   placeholder="https://merchant.com/success"
-                  className="input-field font-mono text-xs"
+                  className="input-field font-mono text-xs bg-white border border-gray-300 text-gray-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 w-full rounded-lg px-3 py-2 transition-all"
                   value={form.redirect_url}
                   onChange={e => f('redirect_url', e.target.value)}
                 />
               </div>
             </div>
-            <p className="text-[10px] text-slate-500 mt-1 italic">
+            <p className="text-[10px] text-gray-500 mt-1 italic">
               * Overrides default merchant URLs for this specific transaction.
             </p>
 
             {/* Customer details */}
-            <div className="pt-2 border-t border-white/5">
-              <div className="text-xs text-slate-500 uppercase tracking-widest font-medium mb-4">Customer Details</div>
+            <div className="pt-2 border-t border-gray-100 mt-2">
+              <div className="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-4 mt-4">Customer Details</div>
               <div className="space-y-4">
                 <div>
-                  <label className="label">Customer Name</label>
+                  <label className="label text-gray-700 font-medium mb-1 block text-sm">Customer Name</label>
                   <input
                     type="text"
                     placeholder="Rahul Sharma"
-                    className="input-field"
+                    className="input-field bg-white border border-gray-300 text-gray-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 w-full rounded-lg px-3 py-2 transition-all"
                     value={form.customer_name}
                     onChange={e => f('customer_name', e.target.value)}
                     required
@@ -140,22 +149,22 @@ export default function CreatePayment() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="label">Email Address</label>
+                    <label className="label text-gray-700 font-medium mb-1 block text-sm">Email Address</label>
                     <input
                       type="email"
                       placeholder="rahul@example.com"
-                      className="input-field"
+                      className="input-field bg-white border border-gray-300 text-gray-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 w-full rounded-lg px-3 py-2 transition-all"
                       value={form.customer_email}
                       onChange={e => f('customer_email', e.target.value)}
                       required
                     />
                   </div>
                   <div>
-                    <label className="label">Mobile Number</label>
+                    <label className="label text-gray-700 font-medium mb-1 block text-sm">Mobile Number</label>
                     <input
                       type="tel"
                       placeholder="9876543210"
-                      className="input-field font-mono"
+                      className="input-field font-mono bg-white border border-gray-300 text-gray-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 w-full rounded-lg px-3 py-2 transition-all"
                       value={form.customer_mobile}
                       onChange={e => f('customer_mobile', e.target.value)}
                       maxLength={10}
@@ -166,11 +175,11 @@ export default function CreatePayment() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <button
                 type="button"
                 onClick={() => setForm({ amount: '', order_id: '', customer_name: '', customer_email: '', customer_mobile: '' })}
-                className="btn-secondary px-6"
+                className="btn-secondary px-6 py-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition-colors font-medium text-sm"
                 disabled={!!loading}
               >
                 Clear
@@ -182,14 +191,14 @@ export default function CreatePayment() {
                   type="button"
                   onClick={() => handleSubmit(null, 'copy')}
                   disabled={!!loading}
-                  className="btn-secondary flex-1 flex items-center justify-center gap-2 border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400"
+                  className="btn-secondary flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors shadow-sm font-medium text-sm"
                 >
                   {loading === 'copy' ? (
-                    <RefreshCw size={15} className="animate-spin" />
+                    <RefreshCw size={15} className="animate-spin text-gray-500" />
                   ) : copied ? (
-                    <CheckCircle2 size={15} />
+                    <CheckCircle2 size={15} className="text-green-600" />
                   ) : (
-                    <Copy size={15} />
+                    <Copy size={15} className="text-gray-500" />
                   )}
                   {copied ? 'URL Copied!' : 'Copy URL'}
                 </button>
@@ -198,7 +207,7 @@ export default function CreatePayment() {
                 <button
                   type="submit"
                   disabled={!!loading}
-                  className="btn-primary flex-[1.5] flex items-center justify-center gap-2"
+                  className="btn-primary flex-[1.5] flex items-center justify-center gap-2 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm font-medium text-sm disabled:opacity-70"
                 >
                   {loading === 'intent' ? (
                     <RefreshCw size={15} className="animate-spin" />
@@ -213,6 +222,7 @@ export default function CreatePayment() {
               </div>
             </div>
           </form>
+        </div>
         </div>
       </div>
     </>
