@@ -81,16 +81,18 @@ export default function APISettings() {
 
           <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-4 shadow-inner">
             <div className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest">Bearer Token</div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <code className="font-mono text-sm text-gray-500 flex-1 break-all bg-white py-1.5 px-3 rounded border border-gray-200 shadow-sm">
                 {show ? token : masked}
               </code>
-              <button onClick={() => setShow(s => !s)} className="p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-gray-500 hover:text-gray-900 transition-colors flex-shrink-0 shadow-sm">
-                {show ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-              <button onClick={() => copy(token, 'main-token')} className="p-2 rounded-lg bg-white border border-gray-200 hover:bg-emerald-50 text-gray-500 hover:text-emerald-600 transition-colors flex-shrink-0 shadow-sm w-[34px] h-[34px] flex items-center justify-center">
-                {copiedId === 'main-token' ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setShow(s => !s)} className="p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-gray-500 hover:text-gray-900 transition-colors flex-shrink-0 shadow-sm">
+                  {show ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+                <button onClick={() => copy(token, 'main-token')} className="p-2 rounded-lg bg-white border border-gray-200 hover:bg-emerald-50 text-gray-500 hover:text-emerald-600 transition-colors flex-shrink-0 shadow-sm w-[34px] h-[34px] flex items-center justify-center">
+                  {copiedId === 'main-token' ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -106,7 +108,7 @@ export default function APISettings() {
             </div>
           )}
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <button
               onClick={handleRegenerate}
               disabled={regen}
@@ -120,7 +122,7 @@ export default function APISettings() {
               {regen ? 'Regenerating…' : confirm ? 'Confirm Regenerate' : 'Regenerate Token'}
             </button>
             {confirm && (
-              <button onClick={() => setConfirm(false)} className="px-5 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-semibold transition-colors shadow-sm">
+              <button onClick={() => setConfirm(false)} className="px-5 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-semibold transition-colors shadow-sm w-full sm:w-auto mt-2 sm:mt-0">
                 Cancel
               </button>
             )}

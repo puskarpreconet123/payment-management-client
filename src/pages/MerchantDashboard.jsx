@@ -23,7 +23,6 @@ export default function MerchantDashboard() {
       const success = txData.success_count || 0;
       const failed = txData.failed_count || 0;
       const pending = txData.pending_count || 0;
-      console.log(txRes.data, profileRes.data)
       setStats({ total, success, failed, pending });
       setRecent(payments.slice(0, 6));
       setProfile(profileRes.data.data);
@@ -43,7 +42,7 @@ export default function MerchantDashboard() {
       <div className="p-6 space-y-6 page-enter">
 
         {/* Welcome Banner */}
-        <div className="glass-card p-5 flex items-center justify-between relative overflow-hidden">
+        <div className="glass-card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/20 to-transparent pointer-events-none" />
           <div className="absolute top-0 right-0 w-64 h-full bg-grid-pattern opacity-20" />
           <div className="relative">
@@ -57,7 +56,7 @@ export default function MerchantDashboard() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatsCard title="Total Payments" value={stats.total} icon={ArrowLeftRight} color="violet" />
           <StatsCard title="Successful" value={stats.success} icon={CheckCircle2} color="emerald" />
           <StatsCard title="Pending" value={stats.pending} icon={Clock} color="amber" />

@@ -225,12 +225,12 @@ export function EmptyState({ icon: Icon, title, desc }) {
 // ── Section Header ─────────────────────────────
 export function SectionHeader({ title, subtitle, action }) {
   return (
-    <div className="flex items-center justify-between mb-8">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
       <div>
         <h1 className="text-xl font-bold text-gray-900 tracking-tight">{title}</h1>
         {subtitle && <p className="text-gray-400 text-sm mt-0.5 font-medium">{subtitle}</p>}
       </div>
-      {action}
+      {action && <div className="w-full sm:w-auto">{action}</div>}
     </div>
   );
 }
