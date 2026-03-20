@@ -65,13 +65,13 @@ export default function Transactions() {
         />
 
         {/* Filters */}
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <Filter size={14} className="text-slate-500" />
+        <div className="flex items-center gap-2 mb-4 overflow-x-auto whitespace-nowrap pb-2 hide-scrollbar">
+          <Filter size={14} className="text-slate-500 shrink-0" />
           {STATUSES.map(s => (
             <button
               key={s || 'all'}
               onClick={() => handleStatusChange(s)}
-              className={`text-xs px-3 py-1.5 rounded-full border transition-all font-medium ${
+              className={`text-xs px-3 py-1.5 rounded-full border transition-all font-medium shrink-0 ${
                 status === s
                   ? 'border-emerald-600 bg-emerald-50 text-emerald-500'
                   : 'border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20'

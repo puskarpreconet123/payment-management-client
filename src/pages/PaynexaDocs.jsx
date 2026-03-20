@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Menu } from "lucide-react";
+import Header from "../components/Header";
   
 const BASE_URL = import.meta.env.VITE_API_URL
 const TABS = ["Create Order", "Handle Response", "Callback (POST)", "Get Transaction"];
@@ -384,27 +385,16 @@ export default function PaynexaDocs() {
   const content = [<CreateOrder />, <HandleResponse />, <CallbackURL />, <GetTransaction />];
 
   return (
-    <div className="min-h-screen bg-gray-50/50 font-sans py-10 px-4">
-      <div className="max-w-[840px] mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-3">
-              <button 
-                onClick={() => setSidebarOpen(true)}
-                className="bg-transparent border-none cursor-pointer text-gray-500 p-1 flex items-center lg:hidden hover:text-gray-900"
-              >
-                <Menu size={20} />
-              </button>
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-[16px] font-black text-white shadow-sm shadow-emerald-500/20">
-                P
-              </div>
-              <span className="text-[22px] font-bold text-gray-900 tracking-tight">
-                Paynexa
-              </span>
-              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full ml-1 uppercase tracking-wider">
-                API Docs
-              </span>
-            </div>
+    <>
+      <Header
+        title="Paynexa API Docs"
+        subtitle="Integration guide and API reference"
+        onMenuClick={() => setSidebarOpen(true)}
+      />
+      <div className="min-h-screen bg-gray-50/50 font-sans py-6 px-4">
+        <div className="max-w-[840px] mx-auto">
+          {/* Base URL Info */}
+          <div className="mb-6">
             <p className="text-gray-500 text-[14px] m-0 leading-relaxed">
               Base URL: <code className="text-gray-600 font-bold bg-white border border-gray-200 px-2 py-0.5 rounded-md shadow-sm ml-1 mr-2">
                 {BASE_URL}
@@ -462,7 +452,8 @@ export default function PaynexaDocs() {
               ))}
             </div>
           </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

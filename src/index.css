@@ -306,7 +306,7 @@
   /* Custom Layout Utilities */
   .layout-container {
     display: flex;
-    height: 100vh;
+    height: 100dvh;
     width: 100%;
     overflow: hidden;
     background-color: #f8fafc;
@@ -317,7 +317,8 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    height: 100vh;
+    height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom, 24px);
     background-color: #f8fafc;
     color: #0f172a;
   }

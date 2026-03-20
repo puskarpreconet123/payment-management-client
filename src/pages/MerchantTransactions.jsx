@@ -43,11 +43,11 @@ export default function MerchantTransactions() {
       <div className="p-6 page-enter bg-gray-50/50 min-h-[calc(100vh-64px)]">
         <SectionHeader title="Transaction History" subtitle={`${data.total} total payments`} />
 
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <Filter size={14} className="text-gray-500" />
+        <div className="flex items-center gap-2 mb-4 overflow-x-auto whitespace-nowrap pb-2 hide-scrollbar">
+          <Filter size={14} className="text-gray-500 shrink-0" />
           {STATUSES.map(s => (
             <button key={s || 'all'} onClick={() => { setStatus(s); setPage(1); }}
-              className={`text-xs px-3.5 py-1.5 rounded-full border transition-all font-medium shadow-sm ${
+              className={`text-xs px-3.5 py-1.5 rounded-full border transition-all font-medium shadow-sm shrink-0 ${
                 status === s 
                   ? 'border-emerald-600 bg-emerald-50 text-emerald-700' 
                   : 'border-gray-200 bg-white text-gray-600 hover:text-gray-900 hover:bg-gray-50'
