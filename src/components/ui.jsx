@@ -91,14 +91,16 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-lg' })
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={`${maxWidth} w-full bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 animate-in fade-in zoom-in duration-200`}>
-        <div className="flex items-center justify-between mb-6">
+      <div className={`${maxWidth} w-full bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200`}>
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 shrink-0">
           <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
             <X size={18} />
           </button>
         </div>
-        {children}
+        <div className="p-6 overflow-y-auto">
+          {children}
+        </div>
       </div>
     </div>
   );

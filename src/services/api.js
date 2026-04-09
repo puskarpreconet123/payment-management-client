@@ -38,6 +38,10 @@ export const createMerchant = (data) => api.post('/api/admin/merchants', data);
 export const updateMerchantStatus = (id, status) => api.patch(`/api/admin/merchants/${id}/status`, { status });
 export const assignMids = (id, mid_ids) => api.post(`/api/admin/merchants/${id}/mids`, { mid_ids });
 
+export const generateOtp = (mobile_no) => api.post('/api/admin/otp/generate', { mobile_no });
+export const verifyOtp = (data) => api.post('/api/admin/otp/verify', data);
+export const checkOtpStatus = (requestId) => api.get(`/api/admin/otp/status/${requestId}`);
+
 export const getMids = (params) => api.get('/api/admin/mids', { params });
 export const getMidPerformance = (params) => api.get('/api/admin/mids/performance', { params });
 export const createMid = (data) => api.post('/api/admin/mids', data);
