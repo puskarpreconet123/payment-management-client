@@ -65,14 +65,14 @@ export default function Merchants() {
   };
 
   const handleGenerateOtp = async () => {
-    if (!form.mobile_no) {
-      setErr('Please enter mobile number first');
+    if (!form.mobile_no || !form.name) {
+      setErr('Please enter merchant name and mobile number first');
       return;
     }
     setErr('');
     setSaving(true);
     try {
-      const res = await generateOtp(form.mobile_no);
+      const res = await generateOtp(form.mobile_no, form.name);
       const resData = res.data?.data || res.data;
       setOtp(resData?.requestId || '');
       
@@ -288,7 +288,7 @@ export default function Merchants() {
                   <button
                     type="button"
                     onClick={handleGenerateOtp}
-                    disabled={saving || !form.mobile_no}
+                    disabled={saving || !form.mobile_no || !form.name}
                     className="btn-secondary flex-1"
                   >
                     {saving ? 'Generating…' : otpSent ? 'Regenerate Session' : 'Generate Verify Link'}
