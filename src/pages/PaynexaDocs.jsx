@@ -259,13 +259,13 @@ function GetTransaction() {
         Two ways to look up transaction details — by payment ID or by date (for reconciliation).
       </p>
 
-      <div className="flex gap-2 mb-6 bg-gray-100/50 p-1.5 rounded-xl border border-gray-200">
+      <div className="flex gap-1.5 mb-6 bg-gray-100/50 p-1.5 rounded-xl border border-gray-200 shadow-sm">
         {[["id", "By Payment ID"], ["date", "By Date"]].map(([k, l]) => (
           <button key={k} onClick={() => setMode(k)} className={`
-            px-4 py-2 rounded-lg cursor-pointer font-semibold text-[13px] transition-all
+            flex-1 px-4 py-2 rounded-lg cursor-pointer font-semibold text-[13px] transition-all
             ${mode === k 
-              ? 'bg-white text-emerald-600 shadow-sm border border-gray-200/50' 
-              : 'bg-transparent text-gray-500 border border-transparent hover:text-gray-700'
+              ? 'bg-white text-emerald-600 shadow-sm border border-gray-200/60' 
+              : 'bg-transparent text-gray-500 border border-transparent hover:text-gray-700 hover:bg-gray-100/40'
             }
           `}>{l}</button>
         ))}

@@ -59,6 +59,11 @@ export const generateToken = () => api.post('/api/merchant/token/generate');
 export const updateWebhookUrl = (webhook_url) => api.patch('/api/merchant/webhook-url', { webhook_url });
 export const getAssignedMids = () => api.get('/api/merchant/mids');
 
+// Merchant Onboarding
+export const generateMerchantOnboardingOtp = (mobile_no) => api.post('/api/merchant/onboarding/otp/generate', { mobile_no });
+export const verifyMerchantOnboarding = (data) => api.post('/api/merchant/onboarding/otp/verify', data);
+export const checkMerchantOnboardingStatus = (requestId) => api.get(`/api/merchant/onboarding/otp/status/${requestId}`);
+
 // ── Payments ───────────────────────────────────
 export const createPayment = (data) => api.post('/api/payments/create', data);
 export const getPaymentStatus = (payment_id) => api.get(`/api/payments/${payment_id}`);

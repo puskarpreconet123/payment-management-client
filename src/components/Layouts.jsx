@@ -4,6 +4,8 @@ import { Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AdminSidebar from '../components/AdminSidebar';
 import MerchantSidebar from '../components/MerchantSidebar';
+import MerchantOnboarding from '../pages/MerchantOnboarding';
+
 
 export function AdminLayout() {
   const { user, loading } = useAuth();
@@ -45,6 +47,10 @@ export function MerchantLayout() {
 
   if (loading) return null;
   if (!user) return <Navigate to="/merchant/login" replace />;
+
+  if (user.type === 'merchant' && !user.is_mobile_verified) {
+    return <MerchantOnboarding />;
+  }
 
   return (
     <div className="layout-container">
